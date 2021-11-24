@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="fr-CA">
-  <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Plan - Faubourg à m'lasse</title>
-    <link rel="stylesheet" href="css/leaflet.css"/>
-    <link rel="stylesheet" href="css/style.css"/>
-    <script>
-      h = window.innerHeight + "px";
-      document.styleSheets[1].cssRules[1].style.height = h;
-    </script>
-    <script src="js/leaflet.js"></script>
-  </head>
-  <body>
-    <div id="map"></div>
-    <script>
-      var mymap = L.map('map').setView([45.51823567357893, -73.55085910368373], 18);
-      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-          maxZoom: 20,
-          id: 'mapbox/streets-v11',
-          tileSize: 512,
-          zoomOffset: -1,
-          accessToken: 'pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg'
-      }).addTo(mymap);
-      var imageUrl = 'plan-fond-transparent-min.png',
-          imageBounds = [[45.5155088875666, -73.55432183482827], [45.52127103906887, -73.54793549518355]];
-      L.imageOverlay(imageUrl, imageBounds, {
-        opacity: 0.75
-      }).addTo(mymap);
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plan - Faubourg à m'lasse</title>
+  <link rel="stylesheet" href="css/leaflet.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script>
+    h = window.innerHeight + "px";
+    document.styleSheets[1].cssRules[1].style.height = h;
+  </script>
+  <script src="js/leaflet.js"></script>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var mymap = L.map('map').setView([45.51823567357893, -73.55085910368373], 18);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 20,
+        id: 'mapbox/streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: 'pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg'
+    }).addTo(mymap);
+    var imageUrl = 'img/plan-fond-transparent-min.png',
+        imageBounds = [[45.5155088875666, -73.55432183482827], [45.52127103906887, -73.54793549518355]];
+    L.imageOverlay(imageUrl, imageBounds, {
+      opacity: 0.75
+    }).addTo(mymap);
+  </script>
+</body>
 </html>
