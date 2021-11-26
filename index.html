@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Plan - Faubourg à m'lasse</title>
+  <title>Démonstration - Faubourg à m'lasse</title>
   <link rel="stylesheet" href="css/leaflet.css"/>
   <link rel="stylesheet" href="css/style.css"/>
   <script>
@@ -15,20 +15,47 @@
 <body>
   <div id="map"></div>
   <script>
-    var mymap = L.map('map').setView([45.51823567357893, -73.55085910368373], 18);
-    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 20,
-        id: 'mapbox/streets-v11',
-        tileSize: 512,
-        zoomOffset: -1,
-        accessToken: 'pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg'
-    }).addTo(mymap);
-    var imageUrl = 'img/plan-fond-transparent-min.png',
-        imageBounds = [[45.5155088875666, -73.55432183482827], [45.52127103906887, -73.54793549518355]];
-    L.imageOverlay(imageUrl, imageBounds, {
-      opacity: 0.75
-    }).addTo(mymap);
+
+  // Tuiles
+  var mapbox = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 20,
+      id: 'mapbox/streets-v11',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg'
+  });
+
+  // Couche image
+  var imageUrl = 'img/plan-fond-transparent-min.png',
+      imageBounds = [[45.5155088875666, -73.55432183482827], [45.52127103906887, -73.54793549518355]];
+
+  // Couche plan
+  var plan = L.imageOverlay(imageUrl, imageBounds, {
+    opacity: 0.75
+  });
+
+  // Couche commerces
+  var commerce_A = L.marker([45.51857363631958, -73.55070940735172]).bindPopup('Commerce A'),
+  commerce_B    = L.marker([45.51817273702336, -73.55133219776212]).bindPopup('Commerce B');
+  var commerces = L.layerGroup([commerce_A, commerce_B]);
+
+  // App
+  var mlasse = L.map(
+    'map', {
+      layers: [mapbox, plan, commerces]
+    }).setView([45.51823567357893, -73.55085910368373], 18);
+
+  // Contrôles
+  var baseMaps = {
+      "<span style='color: gray'>Mapbox</span>": mapbox,
+  };
+  var overlayMaps = {
+      "<span class=\"controles\">Plan d'expropriation</span>": plan,
+      "<span class=\"controles\">Commerces d'alimentation</span>": commerces
+  };
+  L.control.layers(null, overlayMaps).addTo(mlasse);
+
   </script>
 </body>
 </html>
