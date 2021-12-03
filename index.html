@@ -16,9 +16,11 @@
   <div id="map"></div>
   <script>
 
+//  let foo;
+
   // Tuiles
   var mapbox = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>, Archives de Montréal',
       maxZoom: 20,
       id: 'mapbox/streets-v11',
       tileSize: 512,
@@ -37,8 +39,14 @@
 
   // Couche commerces
   var commerce_A = L.marker([45.51857363631958, -73.55070940735172]).bindPopup('Commerce A'),
-  commerce_B    = L.marker([45.51817273702336, -73.55133219776212]).bindPopup('Commerce B');
-  var commerces = L.layerGroup([commerce_A, commerce_B]);
+      commerce_B = L.marker([45.51817273702336, -73.55133219776212]).bindPopup('Commerce B');
+  var commerces = L.layerGroup([
+    commerce_A,
+    commerce_B
+  ]);
+
+  // Couches candidates
+  foo = L.marker();
 
   // App
   var mlasse = L.map(
@@ -52,7 +60,10 @@
   };
   var overlayMaps = {
       "<span class=\"controles\">Plan d'expropriation</span>": plan,
-      "<span class=\"controles\">Commerces d'alimentation</span>": commerces
+      "<span class=\"controles\">Commerces d'alimentation</span>": commerces,
+      "<span class=\"controles\">Carte-index des plans d’utilisation du sol de la ville de Montréal</span>": foo,
+      "<span class=\"controles\">Photographies aériennes des archives</span>": foo,
+      "<span class=\"controles\">Plan d'assurance</span>": foo,
   };
   L.control.layers(null, overlayMaps).addTo(mlasse);
 
