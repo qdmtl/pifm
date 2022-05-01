@@ -16,7 +16,44 @@
   <div id="map"></div>
   <script>
 
-//  let foo;
+  function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.name) {
+      popupContent = feature.properties.name;
+    }
+    layer.bindPopup(popupContent);
+  }
+
+  // GeoJSON
+  let geojsonFeatures = {
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Chapelle Saint-Antoine"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -73.55089724063873,
+            45.51883660822286
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "École Ville-Marie"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -73.55039164423943,
+            45.51727578133604
+          ]
+        }
+      }
+    ]
+  };
 
   // Tuiles
   var mapbox = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -30,29 +67,48 @@
 
   // Couche image
   var imageUrl = 'img/plan-fond-transparent-min.png',
-      imageBounds = [[45.5155088875666, -73.55432183482827], [45.52127103906887, -73.54793549518355]];
+      imageBounds = [
+        [45.5155088875666, -73.55432183482827],
+        [45.52127103906887, -73.54793549518355]
+      ];
 
   // Couche plan
   var plan = L.imageOverlay(imageUrl, imageBounds, {
-    opacity: 0.75
+    opacity: 0.2
   });
 
   // Couche commerces
-  var commerce_A = L.marker([45.51857363631958, -73.55070940735172]).bindPopup('Commerce A'),
-      commerce_B = L.marker([45.51817273702336, -73.55133219776212]).bindPopup('Commerce B');
+  /*
+  var commerce_A = L.marker([
+    45.51882815111977,
+    -73.55097770690918
+  ]).bindPopup('Commerce A'),
+  commerce_B = L.marker([45.51817273702336, -73.55133219776212]).bindPopup('Commerce B');
+
   var commerces = L.layerGroup([
     commerce_A,
     commerce_B
   ]);
+  */
+
+  // Couche GeoJSON
+  var bar = L.geoJSON(geojsonFeatures, {
+    // cette option ajoute le feature au layer après exécution de la fonction
+    onEachFeature: onEachFeature
+  });
 
   // Couches candidates
-  foo = L.marker();
+    foo = L.marker();
 
+try {
   // App
   var mlasse = L.map(
     'map', {
-      layers: [mapbox, plan, commerces]
+      layers: [mapbox, plan, /*commerces,*/ bar]
     }).setView([45.51823567357893, -73.55085910368373], 18);
+} catch (e) {
+  console.error(e);
+}
 
   // Contrôles
   var baseMaps = {
@@ -60,11 +116,13 @@
   };
   var overlayMaps = {
       "<span class=\"controles\">Plan d'expropriation</span>": plan,
-      "<span class=\"controles\">Commerces d'alimentation</span>": commerces,
+      "<span class=\"controles\">Institutions</span>": bar,
       "<span class=\"controles\">Carte-index des plans d’utilisation du sol de la ville de Montréal</span>": foo,
       "<span class=\"controles\">Photographies aériennes des archives</span>": foo,
       "<span class=\"controles\">Plan d'assurance</span>": foo,
   };
+
+
   L.control.layers(null, overlayMaps).addTo(mlasse);
 
   </script>
