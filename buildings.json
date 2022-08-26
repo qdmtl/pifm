@@ -4,7 +4,11 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Chapelle Saint-Antoine"
+        "rdfs:label": "Chapelle Saint-Antoine",
+        "qdmtl:thoroughfare": "foo",
+        "starting": 1234,
+        "ending": 1231,
+        "inventoryNumber": 87
       },
       "geometry": {
         "type": "Point",
@@ -17,7 +21,7 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "École Ville-Marie"
+        "rdfs:label": "École Ville-Marie"
       },
       "geometry": {
         "type": "Point",
@@ -30,7 +34,7 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Asile Saint-Vincent de Paul"
+        "rdfs:label": "Asile Saint-Vincent de Paul"
       },
       "geometry": {
         "type": "Point",
