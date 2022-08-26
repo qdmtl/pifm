@@ -1,14 +1,21 @@
 /**
- * Afficher le plan et placer les points
+ * Plan d'expropriation et photographies du Faubourg à m'lasse
  */
 
 (async () => {
 
-  // Requête pour les buildings
+  /**
+   * Télécharger données (requête http)
+   * Retourner application/geo+json content type
+   * @todo voir https://geojson.org/geojson-ld/
+   */
   const response = await fetch("./buildings.json"),
   geojsonFeatures = await response.json(),
 
-  // Mapbox tiles
+  /**
+   * Mapbox tiles
+   * @todo encode access token
+   */ 
   mapbox = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>, Archives de Montréal",
     maxZoom: 20,
@@ -18,7 +25,10 @@
     accessToken: "pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg"
   }),
 
-  // Données de la couche du plan d'expropriation
+  /**
+   * Données de la couche du plan d'expropriation
+   * @todo Tuiles
+   */ 
   imageUrl = "img/plan-fond-transparent-min.png",
   imageBounds = [
     [45.5155088875666, -73.55432183482827],
@@ -39,8 +49,17 @@
   // Couche GeoJSON
   geoJSON = L.geoJSON(geojsonFeatures, {
     onEachFeature: (feature, layer) => {
-      if (feature.properties)
-        layer.bindPopup(feature.properties.name);
+      if (feature.properties) {
+        const informationsPopUp = `
+          <b>Informations</b>
+          <ul>
+            <li>${feature.properties["rdfs:label"]}</li>
+            <li>${feature.properties["qdmtl:thoroughfare"]}</li>
+            <li>${feature.properties["inventoryNumber"]}</li>
+          </ul>
+        `
+        layer.bindPopup(informationsPopUp);
+      }
     }
   }),
 
