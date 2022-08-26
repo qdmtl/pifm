@@ -53,6 +53,7 @@
         const informationsPopUp = `
           <b>Informations</b>
           <ul>
+            <li>${feature.properties["appellation"]}</li>
             <li>${feature.properties["rdfs:label"]}</li>
             <li>${feature.properties["qdmtl:thoroughfare"]}</li>
             <li>${feature.properties["inventoryNumber"]}</li>

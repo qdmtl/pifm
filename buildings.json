@@ -4,11 +4,12 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "Chapelle Saint-Antoine",
-        "qdmtl:thoroughfare": "foo",
-        "starting": 1234,
-        "ending": 1231,
-        "inventoryNumber": 87
+        "appellation": "Chapelle Saint-Antoine",
+        "rdfs:label": "1379 rue de la Gauchetière Est",
+        "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+        "starting": 1379,
+        "ending": 1379,
+        "inventoryNumber": 247
       },
       "geometry": {
         "type": "Point",
@@ -21,7 +22,12 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "École Ville-Marie"
+        "rdfs:label": "1311 rue Craig rue Est",
+        "appellation": "École Ville-Marie",
+        "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
+        "starting": 1311,
+        "ending": 1311,
+        "inventoryNumber": 172
       },
       "geometry": {
         "type": "Point",
@@ -34,7 +40,12 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "Asile Saint-Vincent de Paul"
+        "rdfs:label": "970-1000 rue de la Visitation",
+        "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Visitation",
+        "appellation": "Asile Saint-Vincent de Paul",
+        "starting": 970,
+        "ending": 1000,
+        "inventoryNumber": 183
       },
       "geometry": {
         "type": "Point",
@@ -47,11 +58,12 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "",
+        "rdfs:label": "1184-1188 rue de la Gauchetière Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
         "starting": 1184,
         "ending": 1188,
-        "inventoryNumber": 219
+        "inventoryNumber": 219,
+        "appellation": ""
       },
       "geometry": {
         "type": "Point",
