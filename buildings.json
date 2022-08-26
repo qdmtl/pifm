@@ -1,0 +1,44 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chapelle Saint-Antoine"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.55089724063873,
+          45.51883660822286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "École Ville-Marie"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.55039164423943,
+          45.51727578133604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Asile Saint-Vincent de Paul"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.55142295360565,
+          45.51726544458981
+        ]
+      }
+    }
+  ]
+}
