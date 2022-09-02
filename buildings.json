@@ -1,1 +1,100 @@
-{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-73.53735208511353,45.552750638555025]}},{"type":"Feature","properties":{"appellation":"Chapelle Saint-Antoine","rdfs:label":"1379 rue de la Gauchetière Est","qdmtl:thoroughfare":"http://data.qdmtl.ca/Thoroughfare/Gauchetiere","starting":1379,"ending":1379,"inventoryNumber":247},"geometry":{"type":"Point","coordinates":[-73.55089724063873,45.51883660822286]}},{"type":"Feature","properties":{"rdfs:label":"1311 rue Craig rue Est","appellation":"École Ville-Marie","qdmtl:thoroughfare":"http://data.qdmtl.ca/Thoroughfare/Craig","starting":1311,"ending":1311,"inventoryNumber":172},"geometry":{"type":"Point","coordinates":[-73.55039164423943,45.51727578133604]}},{"type":"Feature","properties":{"rdfs:label":"970-1000 rue de la Visitation","qdmtl:thoroughfare":"http://data.qdmtl.ca/Thoroughfare/Visitation","appellation":"Asile Saint-Vincent de Paul","starting":970,"ending":1000,"inventoryNumber":183},"geometry":{"type":"Point","coordinates":[-73.55142295360565,45.51726544458981]}},{"type":"Feature","properties":{"rdfs:label":"1184-1188 rue de la Gauchetière Est","qdmtl:thoroughfare":"http://data.qdmtl.ca/Thoroughfare/Gauchetiere","starting":1184,"ending":1188,"inventoryNumber":219,"appellation":""},"geometry":{"type":"Point","coordinates":[-73.55242744088173,45.51654656621812]}},{"type":"Feature","properties":{"qdmtl:thoroughfare":"http://data.qdmtl.ca/Thoroughfare/Gauchetiere","starting":1158,"ending":1164,"rdfs:label":"1158-1164 rue de la Gauchetière Est","inventoryNumber":237},"geometry":{"type":"Point","coordinates":[-73.55268023908138,45.51637271843547]}}]}
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "appellation": "Chapelle Saint-Antoine",
+                "rdfs:label": "1379 rue de la Gauchetière Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "starting": 1379,
+                "ending": 1379,
+                "inventoryNumber": 247,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55089724063873,
+                    45.51883660822286
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1311 rue Craig rue Est",
+                "appellation": "École Ville-Marie",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
+                "starting": 1311,
+                "ending": 1311,
+                "inventoryNumber": 172,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55039164423943,
+                    45.51727578133604
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "970-1000 rue de la Visitation",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Visitation",
+                "appellation": "Asile Saint-Vincent de Paul",
+                "starting": 970,
+                "ending": 1000,
+                "inventoryNumber": 183,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55142295360565,
+                    45.51726544458981
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1184-1188 rue de la Gauchetière Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "starting": 1184,
+                "ending": 1188,
+                "inventoryNumber": 219,
+                "appellation": "",
+                "validation": 0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55242744088173,
+                    45.51654656621812
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "starting": 1158,
+                "ending": 1164,
+                "rdfs:label": "1158-1164 rue de la Gauchetière Est",
+                "inventoryNumber": 237,
+                "appellation": "",
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55268023908138,
+                    45.51637271843547
+                ]
+            }
+        }
+    ]
+}
