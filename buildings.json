@@ -95,6 +95,152 @@
                     45.51637271843547
                 ]
             }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1323-1325 rue Craig Est ",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
+                "starting": 1323,
+                "ending": 1325,
+                "inventoryNumber": 171,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55013482272624,
+                    45.51746513139655
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1341-1347 rue Craig Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
+                "starting": 1341,
+                "ending": 1347,
+                "inventoryNumber": 169,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.54998327791691,
+                    45.51771978977845
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "starting": 1347,
+                "rdfs:label": "1347-1349 rue de la Gauchetière Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "ending": 1349,
+                "inventoryNumber": 71,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.5512539744377,
+                    45.518267160443756
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1351-1359 rue de la Gauchetière Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "starting": 1351,
+                "ending": 1359,
+                "inventoryNumber": 77,
+                "validation": 1,
+                "notes": "Inclut également l'adresse 1051 Panet"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55107158422469,
+                    45.51844664048123
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1087-1089 rue Plessis",
+                "inventoryNumber": 81,
+                "starting": 1087,
+                "ending": 1089,
+                "qdmtl:thoroughfare": "",
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55102062225342,
+                    45.5193214800069
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1101 rue Panet",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Panet",
+                "starting": 1101,
+                "ending": 1101,
+                "inventoryNumber": 72,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.5516918450594,
+                    45.518703173781695
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1109 rue Panet",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Panet",
+                "starting": 1109,
+                "ending": 1109,
+                "inventoryNumber": 242,
+                "validation": 1
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55175152420998,
+                    45.51881687498036
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "rdfs:label": "1150-1154 rue de la Gauchetière Est",
+                "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
+                "starting": 1150,
+                "ending": 1154,
+                "inventoryNumber": 237,
+                "validation": 1,
+                "notes": "inclut également 1009-1007 Wolfe"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -73.55278551578522,
+                    45.516259952019034
+                ]
+            }
         }
     ]
 }
