@@ -2,3 +2,4 @@ node_modules/
 post-receive
 img/infographie/*
 .DS_Store
+sources/
