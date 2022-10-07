@@ -83,7 +83,7 @@
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
         "starting": 1158,
         "ending": 1164,
-        "rdfs:label": "1158 -1164 rue de la Gauchetière Est",
+        "rdfs:label": "1158-1164 rue de la Gauchetière Est",
         "inventoryNumber": 237,
         "appellation": "",
         "validation": 1
@@ -99,7 +99,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1323 -1325 rue Craig Est ",
+        "rdfs:label": "1323-1325 rue Craig Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
         "starting": 1323,
         "ending": 1325,
@@ -176,7 +176,7 @@
         "inventoryNumber": 81,
         "starting": 1087,
         "ending": 1089,
-        "qdmtl:thoroughfare": "",
+        "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Plessis",
         "validation": 1
       },
       "geometry": {
@@ -226,7 +226,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1150 -1154 rue de la Gauchetière Est",
+        "rdfs:label": "1150-1154 rue de la Gauchetière Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
         "starting": 1150,
         "ending": 1154,
@@ -263,7 +263,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1159 - 1167A rue Craig Est",
+        "rdfs:label": "1159-1167 rue Craig Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
         "starting": "1159 ",
         "ending": "1167A",
@@ -281,7 +281,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1169 - 1181 rue Craig Est",
+        "rdfs:label": "1169-1181 rue Craig Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
         "starting": 1169,
         "ending": 1181,
@@ -300,7 +300,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1201 - 1207 rue Craig Est",
+        "rdfs:label": "1201-1207 rue Craig Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Craig",
         "starting": 1201,
         "ending": 1207,
@@ -319,7 +319,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1183 - 1189 rue de la Gauchetière Est",
+        "rdfs:label": "1183-1189 rue de la Gauchetière Est",
         "notes": "inclut également 1054 Montcalm",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
         "starting": 1183,
@@ -339,7 +339,7 @@
     {
       "type": "Feature",
       "properties": {
-        "rdfs:label": "1234 - 1238 rue de la Gauchetière Est",
+        "rdfs:label": "1234-1238 rue de la Gauchetière Est",
         "qdmtl:thoroughfare": "http://data.qdmtl.ca/Thoroughfare/Gauchetiere",
         "starting": 1234,
         "ending": 1238,
