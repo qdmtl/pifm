@@ -3,3 +3,4 @@ post-receive
 img/infographie/*
 .DS_Store
 sources/
+tiles/
