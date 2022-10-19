@@ -1,5 +1,5 @@
 /**
- * Le Faubourg à m’lasse en ligne (FML)
+ * Plan interactif du Faubourg à m’lasse (PIFM)
  * 
  * Plan interactif du Faubourg à m’lasse (secteur Radio-Canada) intégrant des données
  * structurées, des photograpies d’archives, des cartes historiques et d’autres données.
@@ -7,17 +7,6 @@
  * @requires module:leaflet
  * @author David Valentine <d@ntnlv.ca>
  */
-
-/**
- * Mapbox config
- * @todo encode access token
- */ 
-const mapBoxURL = "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-mapBoxConfig = {
-  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>, Archives de Montréal",
-  id: "mapbox/streets-v11",
-  accessToken: "pk.eyJ1IjoiZGF2dmFsZW50IiwiYSI6ImNrdmluZjh6cTBnYjkydXFna3lnOWRwM3oifQ.7qwZCUJ2JW2WFJ8JtDQfUg"
-};
 
 (async () => {
 
@@ -27,18 +16,28 @@ mapBoxConfig = {
    * @todo voir https://geojson.org/geojson-ld/
    * @todo voir linked places format
    */
-  const response = await fetch("./buildings.json"),
-  geojsonFeatures = await response.json(),
+  let response = await fetch("./buildings.json");
+  const geojsonFeatures = await response.json();
+
+  /** FAML Tiles */
+  let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png";
+
+  /** Localhost tiles for dev */
+  if (location.host === "localhost" || location.host === "127.0.0.1") {
+    response = await fetch("./js/config.json");
+    tilesUrl = await response.json();
+    tilesUrl = tilesUrl.devUrl;
+  }
 
   /** Base Layer */
-  baseLayer = L.tileLayer("https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Imagery © Google, Archives de Montréal",
+  const baseLayer = L.tileLayer("https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+  attribution: "Map data &copy; QDMTL, Imagery © Google, Archives de Montréal",
     maxZoom: 20,
     tileSize: 256
   }),
 
-  /** Faubourg Layer */ 
-   faubourgLayer = L.tileLayer("https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png", {
+  /** FAML Layer */
+  faubourgLayer = L.tileLayer(tilesUrl, {
     maxZoom: 20,
     tileSize: 256,
     opacity: 1
@@ -98,4 +97,3 @@ mapBoxConfig = {
   geoJSON.addTo(planDuFaubourg);
 
 })();
-

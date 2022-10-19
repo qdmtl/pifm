@@ -4,3 +4,4 @@ img/infographie/*
 .DS_Store
 sources/
 tiles/
+js/config.json
