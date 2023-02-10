@@ -53,6 +53,7 @@
       minZoom: 15,
       zoomDelta: 0.5,
       zoomSnap: 0.5,
+      zoomControl: false,
       layers: [
         baseLayer,
         faubourgLayer
@@ -114,13 +115,15 @@
       }
     }),
 
-    /** Controls */
+    /** Layers control data */
     overlayMaps = {
       "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
       "<span class=\"controles\">Bâtiments</span>": geoJSON,
     },
 
-    addControls = L.control.layers(null, overlayMaps).addTo(planDuFaubourg),
+    addLayerControl = L.control.layers(null, overlayMaps).addTo(planDuFaubourg),
+    addZoomControl = L.control.zoom({position:"topright"}).addTo(planDuFaubourg),
+    addScale = L.control.scale().addTo(planDuFaubourg),
     addJsonLayer = geoJSON.addTo(planDuFaubourg);
 
   planDuFaubourg.on("popupopen", () => {
