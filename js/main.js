@@ -34,7 +34,7 @@
    * Photos aériennes 
    */
   const baseLayer = L.tileLayer("https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-  attribution: "Map data &copy; QDMTL, Imagery © Google, Archives de Montréal",
+  attribution: "🇺🇦 Map data &copy; QDMTL, Imagery © Google, Archives de Montréal",
     maxZoom: 20,
     tileSize: 256
   }),
