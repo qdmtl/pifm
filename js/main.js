@@ -10,24 +10,64 @@
 
 (async () => {
 
-  /**
-   * Télécharger données (requête http)
-   * Retourner application/geo+json content type
-   * @todo voir https://geojson.org/geojson-ld/
-   * @todo voir linked places format
-   */
-  let response = await fetch("./buildings.json");
-  const geojsonFeatures = await response.json();
+  let response;
 
-  /** FAML Tiles */
-  let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png";
+  /** URLs assignments */
+  let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png",
+    tripleStoreEndpointUrl = "http://qdmtl.ca/sparql/endpoint.php";
 
-  /** Localhost tiles for dev */
-  if (location.host === "localhost" || location.host === "127.0.0.1") {
-    response = await fetch("./js/config.json");
-    tilesUrl = await response.json();
-    tilesUrl = tilesUrl.devUrl;
+  /** Fetch values for dev env */
+  if (dev()) { // develop
+    response = await fetch("./js/config.json"); // config.json is .gitignored
+    const dev = await response.json();
+    tilesUrl = dev.devUrl;
+    tripleStoreEndpointUrl = dev.tripleStoreEndpointUrl;
   }
+
+  /** SPARQL query */
+  const buildingsQuery = "query=" + encodeURIComponent(
+    "PREFIX ecrm:<http://erlangen-crm.org/current/>PREFIX geo:<http://www.opengis.net/ont/geosparql#>SELECT ?a ?b WHERE{?a a <http://onto.qdmtl.ca/E24_Building>;ecrm:P53_has_former_or_current_location ?c.?c ecrm:P168_place_is_defined_by ?d.?d geo:asGeoJSON ?b.}"
+    );
+
+  /**
+   * fetching data from triple store
+   * buildings and geographic coordinates
+   */
+  response = await fetch(tripleStoreEndpointUrl, {
+    method: "POST",
+    headers: {
+      "Accept": "application/sparql-results+json",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: buildingsQuery
+  });
+  const sparqlResults = await response.json();
+  if (dev()) { // develop
+    console.log(sparqlResults);
+  };
+
+  /**
+   * making of geoJSON object
+   */
+  let featuresArray = [];
+  sparqlResults.results.bindings.forEach(feature => {
+    featuresArray.push(
+      {
+        "type": "Feature",
+        "properties": {
+          "URI": feature.a.value
+        },
+        "geometry": JSON.parse(feature.b.value)
+  }
+    )
+  });
+  const geojsonFeaturesFromTripleStore = {
+    "type": "FeatureCollection",
+    "features": featuresArray
+  };
+  if (dev()) { // develop
+    console.log(geojsonFeaturesFromTripleStore);
+  };
 
   /** 
    * Base Layer
