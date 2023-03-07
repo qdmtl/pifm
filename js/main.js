@@ -87,7 +87,7 @@
     }),
 
     /** Instanciation du plan */
-    planDuFaubourg = L.map("map", {
+    pifm = L.map("map", {
       center: [45.51823567357893, -73.55085910368373],
       zoom: 17.5,
       minZoom: 15,
@@ -98,7 +98,7 @@
         baseLayer,
         faubourgLayer
       ]
-    }),
+    });
 
     /**
      * Créer un pane pour la fenêtre pop-up
@@ -106,7 +106,7 @@
      * "Panes are DOM elements used to control the ordering of layers on the map."
      * https://leafletjs.com/reference.html#map-pane
      */
-    informationPane = planDuFaubourg.createPane('fixed', document.querySelector("#map")),
+  pifm.createPane('fixed', document.querySelector("#map"));
 
     /** GeoJSON Layer */
     geoJSON = L.geoJSON(geojsonFeatures, {
@@ -147,11 +147,10 @@
             );
             const targetZoom = 20,
               popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
-              targetPoint = planDuFaubourg.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
-            targetLatLng = planDuFaubourg.unproject(targetPoint, targetZoom);
-            planDuFaubourg.setView(targetLatLng, targetZoom);
-          })
-        }
+          targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
+        targetLatLng = pifm.unproject(targetPoint, targetZoom);
+        pifm.setView(targetLatLng, targetZoom);
+      });
       }
     }),
 
@@ -159,18 +158,26 @@
     overlayMaps = {
       "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
       "<span class=\"controles\">Bâtiments</span>": geoJSON,
-    },
+    };
 
-    addLayerControl = L.control.layers(null, overlayMaps).addTo(planDuFaubourg),
-    addZoomControl = L.control.zoom({position:"topright"}).addTo(planDuFaubourg),
-    addScale = L.control.scale().addTo(planDuFaubourg),
-    addJsonLayer = geoJSON.addTo(planDuFaubourg);
+    L.control.layers(null, overlayMaps).addTo(pifm);
+    L.control.zoom({position:"topright"}).addTo(pifm);
+    L.control.scale().addTo(pifm);
+    geoJSON.addTo(pifm);
 
-  planDuFaubourg.on("popupopen", () => {
-      console.log("Message fired on pop-up opening");
-    }
-  );
-
-  console.log(planDuFaubourg.getPanes());
+  if (dev()) {
+    pifm.on("popupopen", () => console.log("Message fired on pop-up opening"));
+    console.log(pifm.getPanes());
+  };
 
 })();
+
+/**
+ * dev env tester
+ * @returns boolean
+ */
+function dev() {
+  return (location.host === "localhost" || location.host === "127.0.0.1")
+    ? true
+    : false;
+}
