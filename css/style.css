@@ -27,10 +27,11 @@ body {
   height: 100%;
   width: 50%;
   min-width: 350px;
+  overflow: auto;
 }
 .popup-fixed .leaflet-popup-content-wrapper {
     border-radius: 0;
-    height: inherit;
+    /*height: inherit;*/
   }
   .popup-fixed .leaflet-popup-tip-container {
     display: none;
