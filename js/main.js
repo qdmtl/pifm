@@ -16,12 +16,25 @@
   let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png",
     tripleStoreEndpointUrl = "http://qdmtl.ca/sparql/endpoint.php";
 
-  /** Fetch values for dev env */
-  if (dev()) { // develop
-    response = await fetch("./js/config.json"); // config.json is .gitignored
-    const dev = await response.json();
-    tilesUrl = dev.devUrl;
-    tripleStoreEndpointUrl = dev.tripleStoreEndpointUrl;
+  /**
+   * Fetch values for dev env 
+   * Store dev env values in session storage
+   * ./js/config.json is .gitignored
+   */
+  if (dev()) {
+
+    response = await fetch("./js/config.json");
+    const devConfiguration = await response.json();
+
+    for (const prop in devConfiguration) {
+      sessionStorage.setItem(prop, devConfiguration[prop]);
+    }
+
+    tilesUrl = devConfiguration.devTilesUrl;
+
+    if (!devConfiguration.onLineTripleStore) {
+      tripleStoreEndpointUrl = devConfiguration.devTripleStoreEndpointUrl;
+    }
   }
 
   /** SPARQL query */
@@ -42,8 +55,9 @@
     body: buildingsQuery
   });
   const sparqlResults = await response.json();
+
   if (dev()) { // develop
-    console.log(sparqlResults);
+    console.log("Dev:", sparqlResults);
   };
 
   /**
