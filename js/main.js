@@ -60,25 +60,27 @@
     console.log("Dev:", sparqlResults);
   };
 
+  let featuresArray = [];
+
   /**
    * making of geoJSON object
    */
-  let featuresArray = [];
   sparqlResults.results.bindings.forEach(feature => {
-    featuresArray.push(
-      {
+
+    featuresArray.push({
         "type": "Feature",
         "properties": {
           "URI": feature.a.value
         },
         "geometry": JSON.parse(feature.b.value)
-  }
-    )
   });
+  });
+
   const geojsonFeaturesFromTripleStore = {
     "type": "FeatureCollection",
     "features": featuresArray
   };
+
   if (dev()) { // develop
     console.log(geojsonFeaturesFromTripleStore);
   };
