@@ -1,11 +1,19 @@
 /**
  * Plan interactif du Faubourg à m’lasse (PIFM)
  * 
- * Plan interactif du Faubourg à m’lasse (secteur Radio-Canada) intégrant des données
- * structurées, des photograpies d’archives, des cartes historiques et d’autres données.
+ * intégration des données structurées du projet QDMTL
+ * intégration des photograpies d’archives
+ * intégration du plan d’expropriation du Fabourg à m’lasse
  *
  * @requires module:leaflet
  * @author David Valentine <d@ntnlv.ca>
+ * @todo loading messages
+ * @todo error handling
+ * @todo ordre de chargement optimal des couches
+ * @todo english for code review
+ * @todo voir https://geojson.org/geojson-ld/
+ * @todo voir linked places format
+ * @todo protocole de geolocalisation : si geojson.io,, charger buildings.json
  */
 
 (async () => {
@@ -68,12 +76,12 @@
   sparqlResults.results.bindings.forEach(feature => {
 
     featuresArray.push({
-        "type": "Feature",
-        "properties": {
-          "URI": feature.a.value
-        },
-        "geometry": JSON.parse(feature.b.value)
-  });
+      "type": "Feature",
+      "properties": {
+        "URI": feature.a.value
+      },
+      "geometry": JSON.parse(feature.b.value)
+    });
   });
 
   const geojsonFeaturesFromTripleStore = {
@@ -116,59 +124,85 @@
       ]
     });
 
-    /**
-     * Créer un pane pour la fenêtre pop-up
-     * @todo lire doc pour la méthode createPane
-     * "Panes are DOM elements used to control the ordering of layers on the map."
-     * https://leafletjs.com/reference.html#map-pane
-     */
+  /**
+   * Créer un pane pour la fenêtre pop-up
+   * @todo lire doc pour la méthode createPane
+   * "Panes are DOM elements used to control the ordering of layers on the map."
+   * https://leafletjs.com/reference.html#map-pane
+   */
   pifm.createPane('fixed', document.querySelector("#map"));
 
-    /** GeoJSON Layer */
-    geoJSON = L.geoJSON(geojsonFeatures, {
-      onEachFeature: (feature, layer) => {
-        if (feature.properties) {
+  /** GeoJSON Layer */
+  const geoJSON = L.geoJSON(geojsonFeaturesFromTripleStore, {
 
+    onEachFeature: (feature, layer) => {
+
+      const popup = L.popup({
+        pane: 'fixed',
+        className: 'popup-fixed',
+        autoPan: false,
+        maxWidth: 2000 // must be larger than 50% of the viewport
+      });
+
+      layer.bindPopup(popup);
+
+      layer.on("click", () => {
+
+        let URI = feature.properties.URI;
+
+        if (dev()) {
+
+          console.log("Dev: Message fired when clicking the geoJSON feature (the marker).");
+
+          if (sessionStorage.getItem("onLineTripleStore") !== "true") {
+            URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
+          }
+        }
+
+        /**
+         * Fetching the ressource
+         * Thenable since await is not allowed if not at top level
+         */
+        fetch(URI, {
+          method: "GET",
+          headers: {
+            "Accept": "application/ld+json",
+          }
+        })
+        .then((response) => response.json())
+        .then((jsonLD) => {
+
+          if (dev) {
+            console.log("Dev: Response from local server:", jsonLD);
+          }
+          
           const popUpInformation = `
-            <div class="classe-ajoutée-dans-le-but-de-placer-limage-pricipale">
-              <h1>${feature.properties["appellation"]}</h1>
-              <ul>
-                <li>${feature.properties["appellation"]}</li>
-                <li>${feature.properties["rdfs:label"]}</li>
-                <li>${feature.properties["qdmtl:thoroughfare"]}</li>
-                <li>${feature.properties["inventoryNumber"]}</li>
-              </ul>
-            </div>
-          `,
+            <h1>${feature.properties.URI}</h1>
+            <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
+          `;
 
-            popup = L.popup({
-              pane: 'fixed',
-              className: 'popup-fixed',
-              autoPan: false
-            }).setContent(popUpInformation);
-
-          layer.bindPopup(popup);
-
-          layer.on("click", () => {
-            console.log("Message fired when clicking the geoJSON feature (the marker).");
-            
-            /**
-             * Trois prochaines instructions
-             * Déplacement et centrage de la punaise
-             */
-            let targetLatLng = L.latLng(
-              /** Coordonnées sont inversées avec GeoJSON */
-              feature.geometry.coordinates[1],
-              feature.geometry.coordinates[0],
-            );
-            const targetZoom = 20,
-              popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
+          popup.setContent(popUpInformation);
+        },
+        (reason) => {
+            /* rejection handler */
+        });
+        
+        /**
+         * Déplacement et centrage de la punaise
+         */
+        let targetLatLng = L.latLng(
+          /** Coordonnées sont inversées avec GeoJSON */
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0],
+        );
+        const targetZoom = 20,
+          popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
           targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
         targetLatLng = pifm.unproject(targetPoint, targetZoom);
         pifm.setView(targetLatLng, targetZoom);
       });
-      }
-    }),
+    }
+  }),
 
     /** Layers control data */
     overlayMaps = {
@@ -182,8 +216,8 @@
     geoJSON.addTo(pifm);
 
   if (dev()) {
-    pifm.on("popupopen", () => console.log("Message fired on pop-up opening"));
-    console.log(pifm.getPanes());
+    pifm.on("popupopen", () => console.log("Dev: Message fired on pop-up opening"));
+    console.log("Dev:", pifm.getPanes());
   };
 
 })();
