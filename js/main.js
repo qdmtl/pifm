@@ -177,15 +177,55 @@
           }
           
           const popUpInformation = `
+            <div class="glide">
+
+              <div class="glider-contain">
+                <div class="glider">
+                  <div>
+                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/178126/VM94C196-0132.jpg">
+                    <div class="overlay"></div>
+                  </div>
+                  <div>
+                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/8/184246/VM94C196-0839.jpg">
+                    <div class="overlay"></div>
+                  </div>
+                  <div>
+                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/177798/VM94C196-0038.jpg">
+                    <div class="overlay"></div>
+                  </div>
+                </div>
+
+                <button aria-label="Previous" class="glider-prev">«</button>
+                <button aria-label="Next" class="glider-next">»</button>
+                <div role="tablist" class="dots"></div>
+
+              </div>
+
+              <!--
+              <div class="glide__arrows" data-glide-el="controls">
+                <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
+                  </svg>
+                </button>
+                <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
+                  </svg>
+                </button>
+              </div>
+              -->
+            </div>
+          
+            <div class="rdf-data">
             <h1>${feature.properties.URI}</h1>
+              <div>
             <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
+              </div>
+            </div>
           `;
 
           popup.setContent(popUpInformation);
-        },
-        (reason) => {
-            /* rejection handler */
-        });
         
         /**
          * Déplacement et centrage de la punaise
@@ -200,6 +240,39 @@
           targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
         targetLatLng = pifm.unproject(targetPoint, targetZoom);
         pifm.setView(targetLatLng, targetZoom);
+
+          setTimeout(() => {
+
+            new Glider(document.querySelector('.glider'), {
+              slidesToShow: "auto",
+              itemWidth: 250,
+              arrows: {
+                prev: '.glider-prev',
+                next: '.glider-next'
+              }
+            });
+
+            // const glide = new Glide(".glide", {
+            //   type: 'carousel',
+            //   slideWidth: 400,
+            //   perView: 2,
+            //   focusAt: "center",
+            //   gap: 4,
+            //   animationDuration: 200,
+            //   keyboard: false
+            // });
+
+            // glide.mount();
+
+          }, 1000);
+        },
+        (reason) => {
+            /* rejection handler */
+        }).catch(err => console.log(err));
+
+        if (dev()) {
+          console.log("Dev popup:", popup);
+        }
       });
     }
   }),
