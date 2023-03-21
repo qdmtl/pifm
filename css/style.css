@@ -5,6 +5,9 @@ body {
 body {
   margin: 0;
 }
+
+/* leaflet */
+
 #map {
   height: 100%;
 }
@@ -27,12 +30,80 @@ body {
   height: 100%;
   width: 50%;
   min-width: 350px;
-  overflow: auto;
 }
 .popup-fixed .leaflet-popup-content-wrapper {
-    border-radius: 0;
-    /*height: inherit;*/
-  }
-  .popup-fixed .leaflet-popup-tip-container {
+  border-radius: 0;
+}
+.popup-fixed .leaflet-popup-tip-container {
     display: none;
-  }
+}
+.leaflet-popup-content {
+    width: 100% !important;
+    height: 100vh;
+    margin: 0;
+}
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: none;
+	   -moz-transition: none;
+	  transition: none;
+	}
+
+/* glide.js + RDF */
+/*
+.glide {
+    height: 50vh;
+}
+*/
+.rdf-data {
+    height: 50%;
+}
+
+/* glide.js */
+
+/**
+ * Les images ont des hauteurs différentes (quelques pixels)
+ * top: 10px permet de les aligner en bas
+ * top: -10px permet de combler l'espace créé en haut
+ * +/- 2 px de jeu
+ * à surveiller
+ */
+.glide__track {
+  position: relative;
+  top: -10px;
+}
+.glide__slides {
+  top: 10px;
+}
+
+.glide__slide {
+  max-width: 100%;
+  position: relative;
+}
+.glide__slide img {
+	display: block;
+  height: auto;
+	width: 100%;
+}
+.overlay {
+  position: absolute; 
+  inset: 0; 
+  background: rgba(57, 57, 57, 0.7);
+  transition: all .15s ease-in-out;
+}
+.glide__slide[class*="active"] .overlay {
+	opacity: 0;
+}
+.glide__arrow--left{
+	left: 3em;
+}
+.glide__arrow--right {
+	right: 3em;
+}
+
+/* RDF data */
+
+.rdf-data {
+  overflow: auto;
+  cursor: initial;
+}

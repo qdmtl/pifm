@@ -5,18 +5,18 @@
  * intégration des photograpies d’archives
  * intégration du plan d’expropriation du Fabourg à m’lasse
  *
- * @requires module:leaflet
  * @author David Valentine <d@ntnlv.ca>
- * @todo loading messages
+ * @todo loading messages (chargement)
+ * @todo cache
  * @todo error handling
- * @todo ordre de chargement optimal des couches
- * @todo english for code review
+ * @todo build process and cp in dist folder for deployment
+ * @todo get rid of warnings liens source (map)
  * @todo voir https://geojson.org/geojson-ld/
  * @todo voir linked places format
  * @todo protocole de geolocalisation : si geojson.io,, charger buildings.json
  */
 
-(async () => {
+(async function main() {
 
   let response;
 
@@ -62,78 +62,46 @@
     },
     body: buildingsQuery
   });
-  const sparqlResults = await response.json();
+  const sparqlResponse = await response.json();
 
   if (dev()) { // develop
-    console.log("Dev:", sparqlResults);
+    console.log("Dev: sparqlResponse", sparqlResponse);
   };
-
-  let featuresArray = [];
 
   /**
    * making of geoJSON object
+   * function expression to be called
    */
-  sparqlResults.results.bindings.forEach(feature => {
+  const geojsonFeatures = (sparqlJson) => {
 
-    featuresArray.push({
-      "type": "Feature",
-      "properties": {
-        "URI": feature.a.value
-      },
-      "geometry": JSON.parse(feature.b.value)
-    });
-  });
+    let featuresArray = [];
 
-  const geojsonFeaturesFromTripleStore = {
-    "type": "FeatureCollection",
-    "features": featuresArray
-  };
+    sparqlJson.results.bindings.forEach(feature => {
 
-  if (dev()) { // develop
-    console.log(geojsonFeaturesFromTripleStore);
-  };
-
-  /** 
-   * Base Layer
-   * Photos aériennes 
-   */
-  const baseLayer = L.tileLayer("https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-  attribution: "🇺🇦 Map data &copy; QDMTL, Imagery © Google, Archives de Montréal",
-    maxZoom: 20,
-    tileSize: 256
-  }),
-
-    /** FAML Layer */
-    faubourgLayer = L.tileLayer(tilesUrl, {
-      maxZoom: 20,
-      tileSize: 256,
-      opacity: 1
-    }),
-
-    /** Instanciation du plan */
-    pifm = L.map("map", {
-      center: [45.51823567357893, -73.55085910368373],
-      zoom: 17.5,
-      minZoom: 15,
-      zoomDelta: 0.5,
-      zoomSnap: 0.5,
-      zoomControl: false,
-      layers: [
-        baseLayer,
-        faubourgLayer
-      ]
+      featuresArray.push({
+        "type": "Feature",
+        "properties": {
+          "URI": feature.a.value
+        },
+        "geometry": JSON.parse(feature.b.value)
+      });
     });
 
-  /**
-   * Créer un pane pour la fenêtre pop-up
-   * @todo lire doc pour la méthode createPane
-   * "Panes are DOM elements used to control the ordering of layers on the map."
-   * https://leafletjs.com/reference.html#map-pane
-   */
-  pifm.createPane('fixed', document.querySelector("#map"));
+    const geojsonFeatures = {
+      "type": "FeatureCollection",
+      "features": featuresArray
+    };
+
+    if (dev()) { // develop
+      console.log("Dev geojsonFeatures:", geojsonFeatures);
+    };
+
+    return geojsonFeatures;
+    
+  };
 
   /** GeoJSON Layer */
-  const geoJSON = L.geoJSON(geojsonFeaturesFromTripleStore, {
+  const geoJSON = L.geoJSON(geojsonFeatures(sparqlResponse), {
 
     onEachFeature: (feature, layer) => {
 
@@ -141,7 +109,8 @@
         pane: 'fixed',
         className: 'popup-fixed',
         autoPan: false,
-        maxWidth: 2000 // must be larger than 50% of the viewport
+        maxWidth: 2000, // must be larger than 50% of the viewport
+        content: "Chargement"
       });
 
       layer.bindPopup(popup);
@@ -179,29 +148,23 @@
           const popUpInformation = `
             <div class="glide">
 
-              <div class="glider-contain">
-                <div class="glider">
-                  <div>
+              <div class="glide__track" data-glide-el="track">
+                <ul class="glide__slides">
+                  <li class="glide__slide">
                     <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/178126/VM94C196-0132.jpg">
                     <div class="overlay"></div>
-                  </div>
-                  <div>
+                  </li>
+                  <li class="glide__slide">
                     <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/8/184246/VM94C196-0839.jpg">
                     <div class="overlay"></div>
-                  </div>
-                  <div>
+                  </li>
+                  <li class="glide__slide">
                     <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/177798/VM94C196-0038.jpg">
                     <div class="overlay"></div>
-                  </div>
-                </div>
-
-                <button aria-label="Previous" class="glider-prev">«</button>
-                <button aria-label="Next" class="glider-next">»</button>
-                <div role="tablist" class="dots"></div>
-
+                  </li>
+                </ul>
               </div>
 
-              <!--
               <div class="glide__arrows" data-glide-el="controls">
                 <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
@@ -214,55 +177,44 @@
                   </svg>
                 </button>
               </div>
-              -->
             </div>
           
             <div class="rdf-data">
-            <h1>${feature.properties.URI}</h1>
+              <h1>${feature.properties.URI}</h1>
               <div>
-            <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
+                <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
               </div>
             </div>
           `;
 
           popup.setContent(popUpInformation);
-        
-        /**
-         * Déplacement et centrage de la punaise
-         */
-        let targetLatLng = L.latLng(
-          /** Coordonnées sont inversées avec GeoJSON */
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0],
-        );
-        const targetZoom = 20,
-          popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
-          targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
-        targetLatLng = pifm.unproject(targetPoint, targetZoom);
-        pifm.setView(targetLatLng, targetZoom);
+
+          /**
+           * Déplacement et centrage de la punaise
+           */
+          let targetLatLng = L.latLng(
+            /** Coordonnées sont inversées avec GeoJSON */
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+          );
+          const targetZoom = 20,
+            popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
+            targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
+          targetLatLng = pifm.unproject(targetPoint, targetZoom);
+          pifm.setView(targetLatLng, targetZoom);
 
           setTimeout(() => {
 
-            new Glider(document.querySelector('.glider'), {
-              slidesToShow: "auto",
-              itemWidth: 250,
-              arrows: {
-                prev: '.glider-prev',
-                next: '.glider-next'
-              }
+            const glide = new Glide(".glide", {
+              type: 'carousel',
+              perView: 2,
+              focusAt: "center",
+              gap: 4,
+              animationDuration: 200,
+              keyboard: true
             });
 
-            // const glide = new Glide(".glide", {
-            //   type: 'carousel',
-            //   slideWidth: 400,
-            //   perView: 2,
-            //   focusAt: "center",
-            //   gap: 4,
-            //   animationDuration: 200,
-            //   keyboard: false
-            // });
-
-            // glide.mount();
+            glide.mount();
 
           }, 1000);
         },
@@ -277,20 +229,70 @@
     }
   }),
 
+    /** 
+     * Base Layer
+     * Photos aériennes
+     */
+    baseLayer = L.tileLayer("https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+    attribution: "🇺🇦 Map data &copy; QDMTL, Imagery © Google, Archives de Montréal",
+      maxZoom: 20,
+      tileSize: 256
+    }),
+
+    /** FAML Layer */
+    faubourgLayer = L.tileLayer(tilesUrl, {
+      maxZoom: 20,
+      tileSize: 256,
+      opacity: 1
+    }),
+
+    /** Instanciation du plan */
+    pifm = L.map("map", {
+      center: [45.51823567357893, -73.55085910368373],
+      zoom: 17.5,
+      minZoom: 15,
+      zoomDelta: 0.5,
+      zoomSnap: 0.5,
+      zoomControl: false,
+
+      layers: [
+        baseLayer,
+        faubourgLayer,
+        geoJSON
+      ]
+    });
+
+  /**
+   * Créer un pane pour la fenêtre pop-up
+   * "Panes are DOM elements used to control the ordering of layers on the map."
+   * https://leafletjs.com/reference.html#map-pane
+   */
+  pifm.createPane('fixed', document.querySelector("#map"));
+
+  const addControls = (() => {
+
     /** Layers control data */
-    overlayMaps = {
+    const overlays = {
       "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
       "<span class=\"controles\">Bâtiments</span>": geoJSON,
     };
 
-    L.control.layers(null, overlayMaps).addTo(pifm);
-    L.control.zoom({position:"topright"}).addTo(pifm);
-    L.control.scale().addTo(pifm);
-    geoJSON.addTo(pifm);
+    L.control.layers(null, overlays).addTo(pifm),
+    L.control.zoom({position:"topright"}).addTo(pifm),
+    L.control.scale({
+      position:"bottomright",
+      maxWidth: 150
+    }).addTo(pifm);
+
+  })();
 
   if (dev()) {
-    pifm.on("popupopen", () => console.log("Dev: Message fired on pop-up opening"));
-    console.log("Dev:", pifm.getPanes());
+    pifm.on("popupopen", () => {
+      console.log("Dev: Message fired on pop-up opening");
+    });
+    pifm.on("popupclose", () => {
+      console.log("Dev CLOSE: Message fired on pop-up closing");
+    });
   };
 
 })();
