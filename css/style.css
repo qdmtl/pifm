@@ -39,7 +39,6 @@ header h1 {
 }
 .popup-fixed {
   position: fixed;
-  top: 0 !important;
   right: auto !important;
   bottom: auto !important;
   left: 0 !important;
@@ -55,17 +54,58 @@ header h1 {
 .popup-fixed .leaflet-popup-tip-container {
     display: none;
 }
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	box-shadow: 3px 10px 14px rgba(0,0,0,0.4);
+}
 .leaflet-popup-content {
-    width: 100% !important;
-    height: 100vh;
-    margin: 0;
+  width: 100% !important;
+  height: calc(100vh - 40px);
+  margin: 0;
 }
 .leaflet-fade-anim .leaflet-popup {
 	opacity: 0;
 	-webkit-transition: none;
 	   -moz-transition: none;
 	  transition: none;
-	}
+}
+
+#loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255);
+/*  transition: all 0.075s ease-in-out;*/
+  display: block;
+  z-index: 500;
+  text-align: center;
+}
+#loader p {
+  position: relative;
+  top: 40%;
+  font-size: x-large;
+}
+.spinner {
+  border: 5px solid #575757;
+  border-radius: 50%;
+  border-top: 5px solid #fff;
+  width: 40px;
+  height: 40px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+  top: 35%;
+  margin: auto;
+  position: relative;
+}
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 /* glide.js + RDF */
 /*

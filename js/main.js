@@ -146,6 +146,12 @@
           }
           
           const popUpInformation = `
+
+          <div id="loader">
+              <div class="spinner"></div>
+              <p>Chargement</p>
+            </div>
+
             <div class="glide">
 
               <div class="glide__track" data-glide-el="track">
@@ -215,6 +221,10 @@
             });
 
             glide.mount();
+
+            let loader = document.querySelector("#loader");
+
+            loader.style.display = "none";
 
           }, 1000);
         },
