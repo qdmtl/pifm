@@ -5,13 +5,31 @@ body {
 body {
   margin: 0;
 }
+header {
+  height: 40px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+  z-index: 500;
+  position: relative;
+}
+header h1 {
+  margin: 0;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  height: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+  padding-left: 10px;
+}
+main {
+  height: calc(100vh - 40px);
+}
 
 /* leaflet */
 
 #map {
   height: 100%;
 }
-.controles {
+.controles,
+header h1 {
   font-weight: 900;
   font-size: 1.5rem;
 }
