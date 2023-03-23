@@ -1,23 +1,45 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
 }
 body {
   margin: 0;
 }
-header {
+header div#information-header {
+  display: none;
+}
+header div#application-header {
   height: 40px;
   box-shadow: 0 3px 14px rgba(0,0,0,0.4);
   z-index: 500;
   position: relative;
 }
-header h1 {
+header div#application-header h1 {
   margin: 0;
   font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
   height: 100%;
   padding: 6px;
   box-sizing: border-box;
   padding-left: 10px;
+}
+header div#application-header h1 span {
+  font-size: 80%;
+  color: gray;
+}
+header div#application-header a#icon {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: #333333;
+  width: 46px;
+  height: 40px;
+  margin-right: 10px;
+  font-size: x-large;
+  padding-top: 5px;
+  padding-left: 9px;
+  box-sizing: border-box;
 }
 main {
   height: calc(100vh - 40px);
@@ -29,7 +51,7 @@ main {
   height: 100%;
 }
 .controles,
-header h1 {
+header div#application-header h1 {
   font-weight: 900;
   font-size: 1.5rem;
 }
@@ -114,7 +136,7 @@ header h1 {
 }
 */
 .rdf-data {
-    height: 50%;
+  height: calc(50% - 40px);
 }
 
 /* glide.js */
@@ -162,6 +184,7 @@ header h1 {
 /* RDF data */
 
 .rdf-data {
-  overflow: auto;
   cursor: initial;
+  overflow-x: hidden;
+  overflow-y: auto;
 }

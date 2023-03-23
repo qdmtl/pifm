@@ -22,14 +22,37 @@
   <link rel="stylesheet" href="css/style.css"/>
   <!-- <script src="js/window.js"></script> -->
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
 </head>
 <body>
   <header>
-    <h1>Plan interactif du Faubourg à m’lasse <span>v0.1</span></h1>
+    <div id="information-header">
+      <p>FOO BAR</p>
+    </div>
+    <div id="application-header">
+      <h1>Plan interactif du Faubourg à m’lasse <span>v0.1</span></h1>
+      <a href="#" id="icon" onclick="displayInformation()">
+        <i class="fa fa-bars"></i>
+      </a>
+  </div>
   </header>
   <main>
     <div id="map"></div>
   </main>
   <script src="js/main.js" type="module"></script>
+  <script>
+  function myFunction() {
+    const x = document.getElementById("myLinks");
+    if (x.style.display === "block") {
+      x.style.display = "none";
+    } else {
+      x.style.display = "block";
+    }
+  }
+  function displayInformation() {
+    alert("foobar");
+  }
+  </script>
 </body>
 </html>
