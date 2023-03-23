@@ -6,14 +6,16 @@
  * intégration du plan d’expropriation du Fabourg à m’lasse
  *
  * @author David Valentine <d@ntnlv.ca>
- * @todo loading messages (chargement)
+ * @todo rdfa
+ * @todo loading messages for body tag (chargement)
  * @todo cache
  * @todo error handling
  * @todo build process and cp in dist folder for deployment
  * @todo get rid of warnings liens source (map)
  * @todo voir https://geojson.org/geojson-ld/
  * @todo voir linked places format
- * @todo protocole de geolocalisation : si geojson.io,, charger buildings.json
+ * @todo geolocalisation : si geojson.io, charger buildings.json
+ * @todo geolocalisation : voir placemark @placemarkio
  */
 
 (async function main() {
@@ -109,20 +111,17 @@
         pane: 'fixed',
         className: 'popup-fixed',
         autoPan: false,
-        maxWidth: 2000, // must be larger than 50% of the viewport
-        content: "Chargement"
+        maxWidth: 2000 // must be larger than 50% of the viewport
       });
 
       layer.bindPopup(popup);
 
-      layer.on("click", () => {
+      /** Event passé automatiquement au callback */
+      layer.on("click", (e) => {
 
         let URI = feature.properties.URI;
 
         if (dev()) {
-
-          console.log("Dev: Message fired when clicking the geoJSON feature (the marker).");
-
           if (sessionStorage.getItem("onLineTripleStore") !== "true") {
             URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
           }
@@ -142,7 +141,7 @@
         .then((jsonLD) => {
 
           if (dev) {
-            console.log("Dev: Response from local server:", jsonLD);
+            console.log("Dev: Response from RDF store: ", jsonLD);
           }
           
           const popUpInformation = `
@@ -157,7 +156,10 @@
               <div class="glide__track" data-glide-el="track">
                 <ul class="glide__slides">
                   <li class="glide__slide">
-                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/178126/VM94C196-0132.jpg">
+                    <img
+                      src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/178126/VM94C196-0132.jpg"
+                      alt="foo"
+                      title="bar">
                     <div class="overlay"></div>
                   </li>
                   <li class="glide__slide">
@@ -195,6 +197,10 @@
 
           popup.setContent(popUpInformation);
 
+          if (dev()) {
+            console.log("Dev popup:", popup);
+          }  
+
           /**
            * Déplacement et centrage de la punaise
            */
@@ -231,10 +237,6 @@
         (reason) => {
             /* rejection handler */
         }).catch(err => console.log(err));
-
-        if (dev()) {
-          console.log("Dev popup:", popup);
-        }
       });
     }
   }),
@@ -259,7 +261,7 @@
     /** Instanciation du plan */
     pifm = L.map("map", {
       center: [45.51823567357893, -73.55085910368373],
-      zoom: 17.5,
+      zoom: 18, // https://github.com/Leaflet/Leaflet/issues/3575
       minZoom: 15,
       zoomDelta: 0.5,
       zoomSnap: 0.5,
@@ -298,11 +300,12 @@
 
   if (dev()) {
     pifm.on("popupopen", () => {
-      console.log("Dev: Message fired on pop-up opening");
+      console.log("Dev: Message fired on POPUP OPENING");
     });
-    pifm.on("popupclose", () => {
-      console.log("Dev CLOSE: Message fired on pop-up closing");
+    pifm.on("popupclose", (e) => {
+      console.log("Dev CLOSE: Message fired on pop-up closing", e);
     });
+    pifm.on('click', (e) => console.log("EVENT: click on map", e));
   };
 
 })();
