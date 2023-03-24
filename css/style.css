@@ -2,16 +2,36 @@ html,
 body {
   height: 100%;
   overflow: hidden;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  color: #333333;
 }
 body {
   margin: 0;
 }
 header div#information-header {
   display: none;
+  padding: 10px;
+}
+header div#information-header h1 {
+	margin: 0;
+}
+header div#information-header section {
+  display: flex;
+}
+div.header-column {
+  flex: 1;
+  padding: 10px 20px 10px 0;
+}
+div.header-column h2 {
+  margin-top: 0;
+}
+div.header-column p,
+div.header-column ul {
+	line-height: 1.25;
 }
 header div#application-header {
   height: 40px;
-  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
   z-index: 500;
   position: relative;
 }
@@ -33,12 +53,12 @@ header div#application-header a#icon {
   right: 0;
   top: 0;
   color: #333333;
-  width: 46px;
+  width: 48px;
   height: 40px;
   margin-right: 10px;
   font-size: x-large;
-  padding-top: 5px;
-  padding-left: 9px;
+  text-align: center;
+  padding-top: 6px;
   box-sizing: border-box;
 }
 main {
