@@ -146,7 +146,7 @@
           
           const popUpInformation = `
 
-          <div id="loader">
+            <div id="loader">
               <div class="spinner"></div>
               <p>Chargement</p>
             </div>

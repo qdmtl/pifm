@@ -1,3 +1,9 @@
+/**
+ * Voir protocole de geolocalisation
+ * 
+ * @deprecated
+ */
+
 window.api.map.addLayer(
     L.imageOverlay(
       "https://ntnlv.ca/faubourg/map/img/plan-fond-transparent-min.png", [
