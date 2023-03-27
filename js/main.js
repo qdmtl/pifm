@@ -2,13 +2,15 @@
  * Plan interactif du Faubourg à m’lasse (PIFM)
  * 
  * intégration des données structurées du projet QDMTL
- * intégration des photograpies d’archives
+ * intégration des photographies d’archives :
+ * Archives de montréal, VM094, SY, SS1, SSS3, C196
  * intégration du plan d’expropriation du Fabourg à m’lasse
  *
  * @author David Valentine <d@ntnlv.ca>
- * @todo rdfa
+ * @license MIT https://spdx.org/licenses/MIT.html
+ * @todo rdfa for information header
  * @todo loading messages for body tag (chargement)
- * @todo cache
+ * @todo caching
  * @todo error handling
  * @todo build process and cp in dist folder for deployment
  * @todo get rid of warnings liens source (map)
@@ -17,6 +19,10 @@
  * @todo geolocalisation : si geojson.io, charger buildings.json
  * @todo geolocalisation : voir placemark @placemarkio
  */
+console.log(
+  "%cBienvenue sur le PIFM",
+  "font-family:monospace;font-size:14px;color:darkblue;"
+);
 
 (async function main() {
 
@@ -47,14 +53,14 @@
     }
   }
 
-  /** SPARQL query */
+  /** SPARQL query for buildings */
   const buildingsQuery = "query=" + encodeURIComponent(
     "PREFIX ecrm:<http://erlangen-crm.org/current/>PREFIX geo:<http://www.opengis.net/ont/geosparql#>SELECT ?a ?b WHERE{?a a <http://onto.qdmtl.ca/E24_Building>;ecrm:P53_has_former_or_current_location ?c.?c ecrm:P168_place_is_defined_by ?d.?d geo:asGeoJSON ?b.}"
     );
 
   /**
    * fetching data from triple store
-   * buildings and geographic coordinates
+   * buildings with geographic coordinates
    */
   response = await fetch(tripleStoreEndpointUrl, {
     method: "POST",
@@ -64,11 +70,18 @@
     },
     body: buildingsQuery
   });
+
+  if(!response.ok){
+    throw new Error(`An error occurred: ${response.status}`)
+  }
+
   const sparqlResponse = await response.json();
 
-  if (dev()) { // develop
-    console.log("Dev: sparqlResponse", sparqlResponse);
-  };
+  console.log(
+    "%c%i bâtiments géolocalisés",
+    "font-family:monospace;font-size:14px;color:darkblue;",
+    sparqlResponse.results.bindings.length
+  );
 
   /**
    * making of geoJSON object
@@ -76,30 +89,20 @@
    */
   const geojsonFeatures = (sparqlJson) => {
 
-    let featuresArray = [];
-
-    sparqlJson.results.bindings.forEach(feature => {
-
-      featuresArray.push({
+    let featuresArray = sparqlJson.results.bindings.map(feature => {
+      return {
         "type": "Feature",
         "properties": {
           "URI": feature.a.value
         },
         "geometry": JSON.parse(feature.b.value)
-      });
+      }
     });
 
-    const geojsonFeatures = {
+    return {
       "type": "FeatureCollection",
       "features": featuresArray
     };
-
-    if (dev()) { // develop
-      console.log("Dev geojsonFeatures:", geojsonFeatures);
-    };
-
-    return geojsonFeatures;
-    
   };
 
   /** GeoJSON Layer */
@@ -318,7 +321,6 @@
       zoomDelta: 0.5,
       zoomSnap: 0.5,
       zoomControl: false,
-
       layers: [
         baseLayer,
         faubourgLayer,
@@ -350,24 +352,43 @@
 
   })();
 
+  /** récupérer données de géolocalisation */
+  pifm.on("click", (e) => {
+
+    console.log(e.latlng);
+
+    let coordinates   = `[ a ecrm:E53_Place ;\n`;
+        coordinates  += `  ecrm:P168_place_is_defined_by [\n`;
+        coordinates  += `    a geo:Geometry ;\n`;
+        coordinates  += `    geo:asGeoJSON "{\\"type\\": \\"Point\\", \\"coordinates\\": [${e.latlng.lng},${e.latlng.lat}]}"^^geo:geoJSONLiteral\n`
+        coordinates  += `  ]\n`;
+        coordinates  += `]`;
+
+        console.log(coordinates);
+  })
+
   if (dev()) {
     pifm.on("popupopen", () => {
-      console.log("Dev: Message fired on POPUP OPENING");
+      devConsole("Dev: Message fired on POPUP OPENING");
     });
     pifm.on("popupclose", (e) => {
-      console.log("Dev CLOSE: Message fired on pop-up closing", e);
+      devConsole("Dev CLOSE: Message fired on pop-up closing", e);
     });
-    pifm.on('click', (e) => console.log("EVENT: click on map", e));
   };
 
 })();
 
 /**
  * dev env tester
- * @returns boolean
  */
 function dev() {
   return (location.host === "localhost" || location.host === "127.0.0.1")
     ? true
     : false;
+}
+function devConsole(log) {
+  console.log(
+    `%c${log}: `,
+    "font-family:monospace;color:darkblue;",
+  );
 }
