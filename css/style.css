@@ -112,7 +112,7 @@ header div#application-header h1 {
 	  transition: none;
 }
 
-#loader {
+.loader {
   position: absolute;
   inset: 0;
   background: rgba(255, 255, 255);
@@ -121,7 +121,7 @@ header div#application-header h1 {
   z-index: 500;
   text-align: center;
 }
-#loader p {
+.loader p {
   position: relative;
   top: 40%;
   font-size: x-large;
@@ -155,6 +155,7 @@ header div#application-header h1 {
     height: 50vh;
 }
 */
+
 .rdf-data {
   height: calc(50% - 40px);
 }
@@ -166,7 +167,7 @@ header div#application-header h1 {
  * top: 10px permet de les aligner en bas
  * top: -10px permet de combler l'espace créé en haut
  * +/- 2 px de jeu
- * à surveiller
+ * certains écarts sont trop grands pour être pris en charge par cette solution
  */
 .glide__track {
   position: relative;
@@ -175,7 +176,9 @@ header div#application-header h1 {
 .glide__slides {
   top: 10px;
 }
-
+.custom-glide {
+  position: relative;
+}
 .glide__slide {
   max-width: 100%;
   position: relative;

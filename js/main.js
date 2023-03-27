@@ -117,126 +117,178 @@
       layer.bindPopup(popup);
 
       /** Event passé automatiquement au callback */
-      layer.on("click", (e) => {
+      layer.on("popupopen", async (e) => {
 
+        const popupId = `id-${e.popup._leaflet_id}-`;
+
+        let response;
         let URI = feature.properties.URI;
 
         if (dev()) {
           if (sessionStorage.getItem("onLineTripleStore") !== "true") {
             URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
+            devConsole("Dev triple store");
           }
         }
 
         /**
          * Fetching the ressource
-         * Thenable since await is not allowed if not at top level
          */
-        fetch(URI, {
+        response = await fetch(URI, {
           method: "GET",
           headers: {
             "Accept": "application/ld+json",
           }
-        })
-        .then((response) => response.json())
-        .then((jsonLD) => {
+        });
 
-          if (dev) {
-            console.log("Dev: Response from RDF store: ", jsonLD);
+        const jsonLD = await response.json();
+        
+        if (dev) {
+          console.log("Dev: Response from RDF store: ", jsonLD);
+        }
+
+        const popUpInformation = `
+
+          <div id="${popupId}loader" class="loader">
+            <div class="spinner"></div>
+            <p>Chargement</p>
+            <p id="${popupId}counter"></p>
+          </div>
+
+          <div id="${popupId}glide" class="custom-glide">
+
+            <div class="glide__track" data-glide-el="track">
+              <ul class="glide__slides" id="${popupId}slides">
+              </ul>
+            </div>
+
+            <div class="glide__arrows" data-glide-el="controls">
+              <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                  <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
+                </svg>
+              </button>
+              <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                  <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        
+          <div class="rdf-data">
+            <h1>${feature.properties.URI}</h1>
+            <div>
+              <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
+            </div>
+          </div>
+        `;
+
+        popup.setContent(popUpInformation);
+
+        /**
+         * Déplacement et centrage de la punaise
+         */
+        let targetLatLng = L.latLng(// coordonnées sont inversées avec GeoJSON */
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0],
+        );
+        const targetZoom = 20,
+          popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
+          targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
+        targetLatLng = pifm.unproject(targetPoint, targetZoom);
+        pifm.setView(targetLatLng, targetZoom);
+
+        /** Récupérer l'URI de la ressource */
+        let ressourceUri;
+        jsonLD["@graph"].forEach((ressource)=> {
+
+          if (ressource["@id"].search("http://data.qdmtl.ca/Building/") > -1) {
+            ressourceUri = ressource["@id"];
           }
+        })
+
+        /** SPARQL query for images */
+        let imagesQuery = "PREFIX rico:<https://www.ica.org/standards/RiC/ontology#>PREFIX schema:<https://schema.org/>SELECT ?f WHERE{[]a rico:Record;rico:hasInstantiation ?i;rico:hasOrHadMainSubject<";
+        imagesQuery += ressourceUri;
+        imagesQuery += ">.?i schema:image ?f.}";
+        imagesQuery  = "query=" + encodeURIComponent(imagesQuery);
+
+        /** fetch images URL */
+        response = await fetch(tripleStoreEndpointUrl, {
+          method: "POST",
+          headers: {
+            "Accept": "application/sparql-results+json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: imagesQuery
+        });
+
+        const sparqlResponse = await response.json();
+
+        /** URLs list */
+        let imageUrls = sparqlResponse.results.bindings.map(url => {
+          return url.f.value;
+        });
+
+        /** loads an image, returns a promise */
+        const loadImage = src => {
+
+          return new Promise((resolve, reject) => {
+
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+          });
+        }
+
+        /** loading all ressource images, async */
+        const imagesElements = await Promise.all(imageUrls.map(loadImage));
+
+        /** printing information */
+        console.log("Nombre d'images téléchargées : ", imagesElements.length);
+        const imagesList = imagesElements.map((element) => {
+          return element.currentSrc;
+        })
+        console.log("URLs of images", imagesList);
+
+        /** update the DOM with images for the Leaflet popup */
+        imagesElements.forEach((image, index) => {
+
+          let overlay = document.createElement("div");
+          overlay.className = "overlay";
+
+          let slide = document.createElement("li");
+          slide.className = "glide__slide";
+          slide.appendChild(image);
+          slide.append(overlay);
           
-          const popUpInformation = `
+          let slides = document.querySelector(`#${popupId}slides`);
+          slides.appendChild(slide);
 
-            <div id="loader">
-              <div class="spinner"></div>
-              <p>Chargement</p>
-            </div>
+          /** the loop blocks the main thread so this does nothing */
+          let counter = document.querySelector(`p#${popupId}counter`);
+          counter.innerText = `${++index}/${imagesElements.length}`;
+        });
 
-            <div class="glide">
+        /** caroussel */
+        const glide = new Glide(`#${popupId}glide`, {
+          type: 'carousel',
+          perView: 2,
+          focusAt: "center",
+          gap: 4,
+          animationDuration: 200,
+          keyboard: true
+        });
 
-              <div class="glide__track" data-glide-el="track">
-                <ul class="glide__slides">
-                  <li class="glide__slide">
-                    <img
-                      src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/178126/VM94C196-0132.jpg"
-                      alt="foo"
-                      title="bar">
-                    <div class="overlay"></div>
-                  </li>
-                  <li class="glide__slide">
-                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/8/184246/VM94C196-0839.jpg">
-                    <div class="overlay"></div>
-                  </li>
-                  <li class="glide__slide">
-                    <img src="https://archivesdemontreal.ica-atom.org/uploads/r/ville-de-montreal-section-des-archives/1/7/177798/VM94C196-0038.jpg">
-                    <div class="overlay"></div>
-                  </li>
-                </ul>
-              </div>
+        glide.mount();
 
-              <div class="glide__arrows" data-glide-el="controls">
-                <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                    <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
-                  </svg>
-                </button>
-                <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                    <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          
-            <div class="rdf-data">
-              <h1>${feature.properties.URI}</h1>
-              <div>
-                <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
-              </div>
-            </div>
-          `;
-
-          popup.setContent(popUpInformation);
-
-          if (dev()) {
-            console.log("Dev popup:", popup);
-          }  
-
-          /**
-           * Déplacement et centrage de la punaise
-           */
-          let targetLatLng = L.latLng(
-            /** Coordonnées sont inversées avec GeoJSON */
-            feature.geometry.coordinates[1],
-            feature.geometry.coordinates[0],
-          );
-          const targetZoom = 20,
-            popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
-            targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
-          targetLatLng = pifm.unproject(targetPoint, targetZoom);
-          pifm.setView(targetLatLng, targetZoom);
-
-          setTimeout(() => {
-
-            const glide = new Glide(".glide", {
-              type: 'carousel',
-              perView: 2,
-              focusAt: "center",
-              gap: 4,
-              animationDuration: 200,
-              keyboard: true
-            });
-
-            glide.mount();
-
-            let loader = document.querySelector("#loader");
-
-            loader.style.display = "none";
-
-          }, 1000);
-        },
-        (reason) => {
-            /* rejection handler */
-        }).catch(err => console.log(err));
+        /** hide the spinner */
+        let loader = document.querySelector(`#${popupId}loader`);
+        setTimeout(() => { // wait to make sure it's clean
+          loader.style.display = "none";
+        }, 300);        
       });
     }
   }),
