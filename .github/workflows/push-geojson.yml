@@ -18,4 +18,4 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: Push remote
       run: |
-        cd && scp -P 27 -i /home/runner/.ssh/id_rsa /home/runner/work/faubourg-demo/faubourg-demo/buildings.json ${{ secrets.SSH_TARGET }}:/home/ntnlvca/public_html/faubourg
+        cd && scp -P 27 -i /home/runner/.ssh/id_rsa /home/runner/work/pifm/pifm/buildings.json ${{ secrets.SSH_TARGET }}:/home/ntnlvca/public_html/faubourg
