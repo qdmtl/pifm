@@ -243,6 +243,7 @@ console.log(
             img.onload = () => resolve(img);
             img.onerror = reject;
             img.src = src;
+            console.log("Image en cache : ", img.complete);
           });
         }
 
@@ -252,9 +253,11 @@ console.log(
         /** printing information */
         console.log("Nombre d'images téléchargées : ", imagesElements.length);
         const imagesList = imagesElements.map((element) => {
-          return element.currentSrc;
+          return {
+            src: element.currentSrc
+          };
         })
-        console.log("URLs of images", imagesList);
+        console.log("URL : ", imagesList);
 
         /** update the DOM with images for the Leaflet popup */
         imagesElements.forEach((image, index) => {
