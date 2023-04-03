@@ -30,7 +30,7 @@ console.log(
 
   /** URLs assignments */
   let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png",
-    tripleStoreEndpointUrl = "http://qdmtl.ca/sparql/endpoint.php";
+    tripleStoreEndpointUrl = "https://qdmtl.ca/sparql/endpoint.php";
 
   /**
    * Fetch values for dev env 
