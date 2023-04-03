@@ -133,7 +133,7 @@ console.log(
             devConsole("Dev triple store");
           }
         } else {
-          URI.replace("http", "https");
+          URI = URI.replace("http", "https");
         }
 
         /**
