@@ -132,6 +132,8 @@ console.log(
             URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
             devConsole("Dev triple store");
           }
+        } else {
+          URI.replace("http", "https");
         }
 
         /**
