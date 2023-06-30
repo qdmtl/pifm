@@ -12,12 +12,8 @@
  * @todo loading messages for body tag (chargement)
  * @todo caching
  * @todo error handling
- * @todo build process and cp in dist folder for deployment
  * @todo get rid of warnings liens source (map)
  * @todo voir https://geojson.org/geojson-ld/
- * @todo voir linked places format
- * @todo geolocalisation : si geojson.io, charger buildings.json
- * @todo geolocalisation : voir placemark @placemarkio
  */
 console.log(
   "%cBienvenue sur le PIFM",
