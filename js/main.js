@@ -296,7 +296,7 @@ console.log(
         let loader = document.querySelector(`#${popupId}loader`);
         setTimeout(() => { // wait to make sure it's clean
           loader.style.display = "none";
-        }, 300);        
+        }, 300);
       });
     }
   }),

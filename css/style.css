@@ -13,7 +13,7 @@ header div#information-header {
   padding: 10px;
 }
 header div#information-header h1 {
-	margin: 0;
+  margin: 0;
 }
 header div#information-header section {
   display: flex;
@@ -27,7 +27,7 @@ div.header-column h2 {
 }
 div.header-column p,
 div.header-column ul {
-	line-height: 1.25;
+  line-height: 1.25;
 }
 header div#application-header {
   height: 40px;
