@@ -25,7 +25,7 @@ console.log(
   let response;
 
   /** URLs assignments */
-  let tilesUrl = "https://ntnlv.ca/faubourg/tiles/{z}/{x}/{y}.png",
+  let tilesUrl = "https://qdmtl.ca/pifm/tiles/{z}/{x}/{y}.png",
     tripleStoreEndpointUrl = "https://qdmtl.ca/sparql/endpoint.php";
 
   /**

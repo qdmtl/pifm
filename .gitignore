@@ -3,6 +3,6 @@ post-receive
 img/infographie/*
 .DS_Store
 tiles/
-/js/config.json
-/js/geojson.io.js
+/dist/js/config.json
+/dist/js/geojson.io.js
 /Glider.js-master.zip
