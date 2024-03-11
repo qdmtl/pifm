@@ -23,8 +23,6 @@ console.log(
 
 (async function main() {
 
-  let response;
-
   /** URLs assignments */
   let tilesUrl = "https://qdmtl.ca/pifm/tiles/{z}/{x}/{y}.png",
     tripleStoreEndpointUrl = "https://qdmtl.ca/sparql/endpoint.php";
@@ -36,8 +34,9 @@ console.log(
    */
   if (dev()) {
 
-    response = await fetch("./js/config.json");
-    const devConfiguration = await response.json();
+    const devConfiguration = await fetch("./js/config.json")
+      .then(response => response.json())
+      .catch(error => console.error(error));
 
     for (const prop in devConfiguration) {
       sessionStorage.setItem(prop, devConfiguration[prop]);
@@ -59,20 +58,19 @@ console.log(
    * fetching data from RDF store
    * buildings with geographic coordinates
    */
-  response = await fetch(tripleStoreEndpointUrl, {
+  const sparqlResponse = await fetch(tripleStoreEndpointUrl, {
     method: "POST",
     headers: {
       "Accept": "application/sparql-results+json",
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: buildingsQuery
-  });
-
-  if(!response.ok){
-    throw new Error(`An error occurred: ${response.status}`)
-  }
-
-  const sparqlResponse = await response.json();
+  }).then((response) => {
+    if(!response.ok) {
+      throw new Error(`An error occurred: ${response.status}`)
+    };
+    return response.json();
+  }).catch(error => console.error(error));
 
   console.log(
     "%c%i bâtiments géolocalisés",
@@ -93,7 +91,7 @@ console.log(
           "URI": feature.a.value
         },
         "geometry": JSON.parse(feature.b.value)
-      }
+      };
     });
 
     return {
@@ -129,7 +127,6 @@ console.log(
 
         const popupId = `id-${e.popup._leaflet_id}-`;
 
-        let response;
         let URI = feature.properties.URI;
 
         if (dev()) {
@@ -144,14 +141,19 @@ console.log(
         /**
          * Fetching the resource
          */
-        response = await fetch(URI, {
+        const jsonLD = await fetch(URI, {
           method: "GET",
           headers: {
             "Accept": "application/ld+json",
           }
-        });
-
-        const jsonLD = await response.json();
+        })
+        .then((response) => {
+          if(!response.ok) {
+            throw new Error(`An error occurred: ${response.status}`)
+          };
+          return response.json();
+        })
+        .catch(error => console.error(error));
         
         if (dev) {
           console.log("Dev: Response from RDF store: ", jsonLD);
@@ -225,37 +227,42 @@ console.log(
         imagesQuery  = "query=" + encodeURIComponent(imagesQuery);
 
         /** fetch images URL */
-        response = await fetch(tripleStoreEndpointUrl, {
+        const sparqlResponse = await fetch(tripleStoreEndpointUrl, {
           method: "POST",
           headers: {
             "Accept": "application/sparql-results+json",
             "Content-Type": "application/x-www-form-urlencoded"
           },
           body: imagesQuery
-        });
-
-        const sparqlResponse = await response.json();
+        })
+        .then(response => {
+          if(!response.ok) {
+            throw new Error(`An error occurred: ${response.status}`)
+          };
+          return response.json();
+        })
+        .catch(error => console.error(error));
 
         /** URLs list */
         let imageUrls = sparqlResponse.results.bindings.map(url => {
           return url.f.value;
         });
 
-        /** loads an image, returns a promise */
-        const loadImage = src => {
-
+        /** loading all resource images */
+        /** @todo charger 10 premiers, puis append 10 à la fois */
+        const imagesElements = await Promise.all(imageUrls.map(async src => {
+          
+          /** loads an image, returns a promise */
           return new Promise((resolve, reject) => {
-
             const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
             img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(`Erreur de téléchargement : ${src}`);
             console.log("Image en cache : ", img.complete);
-          });
-        }
-
-        /** loading all ressource images, async */
-        const imagesElements = await Promise.all(imageUrls.map(loadImage));
+          })
+          .catch(error => console.error(error));
+        }))
+        .then(imgages => imgages.filter(img => img !== undefined));
 
         /** printing information in visionneuse */
         console.log(`Nombre d'images téléchargées : ${imagesElements.length}/${imageUrls.length}`);
