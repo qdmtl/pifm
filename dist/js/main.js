@@ -15,6 +15,7 @@
  * @todo get rid of warnings liens source (map)
  * @todo voir https://geojson.org/geojson-ld/
  */
+
 console.log(
   "%cBienvenue sur le PIFM",
   "font-family:monospace;font-size:14px;color:darkblue;"
@@ -29,7 +30,7 @@ console.log(
     tripleStoreEndpointUrl = "https://qdmtl.ca/sparql/endpoint.php";
 
   /**
-   * Fetch values for dev env 
+   * Fetch values for dev environment
    * Store dev env values in session storage
    * ./js/config.json is .gitignored
    */
@@ -55,7 +56,7 @@ console.log(
     );
 
   /**
-   * fetching data from triple store
+   * fetching data from RDF store
    * buildings with geographic coordinates
    */
   response = await fetch(tripleStoreEndpointUrl, {
@@ -101,9 +102,15 @@ console.log(
     };
   };
 
-  /** GeoJSON Layer */
+  /**
+   * GeoJSON Layer for Leaflet
+   * L object is accessible via script tag in the HTML file
+   */
   const geoJSON = L.geoJSON(geojsonFeatures(sparqlResponse), {
-
+    
+    // cet objet permet de spécifier les options pour la méthode geoJSON()
+    // doc: https://leafletjs.com/reference.html#geojson-option
+    // la propriété onEachFeature permet de spécifier les opérations à effectuer pour chaque feature
     onEachFeature: (feature, layer) => {
 
       const popup = L.popup({
@@ -115,8 +122,10 @@ console.log(
 
       layer.bindPopup(popup);
 
-      /** Event passé automatiquement au callback */
-      layer.on("popupopen", async (e) => {
+      /**
+       * Event passé automatiquement au callback
+       * Le callback est exécuté lorsque la visioneuse s'ouvre
+       */
 
         const popupId = `id-${e.popup._leaflet_id}-`;
 
@@ -133,7 +142,7 @@ console.log(
         }
 
         /**
-         * Fetching the ressource
+         * Fetching the resource
          */
         response = await fetch(URI, {
           method: "GET",
@@ -248,8 +257,8 @@ console.log(
         /** loading all ressource images, async */
         const imagesElements = await Promise.all(imageUrls.map(loadImage));
 
-        /** printing information */
-        console.log("Nombre d'images téléchargées : ", imagesElements.length);
+        /** printing information in visionneuse */
+        console.log(`Nombre d'images téléchargées : ${imagesElements.length}/${imageUrls.length}`);
         const imagesList = imagesElements.map((element) => {
           return {
             src: element.currentSrc
@@ -276,7 +285,7 @@ console.log(
           counter.innerText = `${++index}/${imagesElements.length}`;
         });
 
-        /** caroussel */
+        /** initialisation du caroussel */
         const glide = new Glide(`#${popupId}glide`, {
           type: 'carousel',
           perView: 2,
@@ -351,7 +360,9 @@ console.log(
       maxWidth: 150
     }).addTo(pifm);
 
-  })();
+  /**
+   * Utilitaires
+   */
 
   /** récupérer données de géolocalisation */
   pifm.on("click", (e) => {
@@ -380,7 +391,7 @@ console.log(
 })();
 
 /**
- * dev env tester
+ * dev environment tester
  */
 function dev() {
   return (location.host === "localhost" || location.host === "127.0.0.1")
