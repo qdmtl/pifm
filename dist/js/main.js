@@ -35,7 +35,7 @@ console.log(
    */
   if (dev()) {
 
-    response = await fetch("./js/config.json");
+    response = await fetch("./dist/js/config.json");
     const devConfiguration = await response.json();
 
     for (const prop in devConfiguration) {
@@ -383,7 +383,7 @@ console.log(
  * dev env tester
  */
 function dev() {
-  return (location.host === "localhost" || location.host === "127.0.0.1")
+  return (location.host === "localhost" || location.host === "127.0.0.1" || location.host === "faubourg-demo.test")
     ? true
     : false;
 }
