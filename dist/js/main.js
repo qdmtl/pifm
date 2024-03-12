@@ -29,15 +29,27 @@ console.log(
 
   /**
    * Fetch values for dev environment
-   * Store dev env values in session storage
    * ./js/config.json is .gitignored
    */
-  if (dev()) {
+  const devConfiguration = await fetch("./js/config.json")
+    .then(response => {
+      if (!response.ok) {
+        return {
+          devEnv: false
+        };
+      }
+      return response.json();
+    })
+    .catch(error => console.error(error));
 
-    const devConfiguration = await fetch("./js/config.json")
-      .then(response => response.json())
-      .catch(error => console.error(error));
+  if (devConfiguration.devEnv) {
 
+    console.log(
+      "%cDev Environment",
+      "font-family:monospace;font-size:14px;color:darkblue;"
+    );
+
+    // store dev env values in session storage
     for (const prop in devConfiguration) {
       sessionStorage.setItem(prop, devConfiguration[prop]);
     }
@@ -129,7 +141,7 @@ console.log(
 
         let URI = feature.properties.URI;
 
-        if (dev()) {
+        if (devConfiguration.devEnv) {
           if (sessionStorage.getItem("onLineTripleStore") !== "true") {
             URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
             devConsole("Dev triple store");
@@ -155,7 +167,7 @@ console.log(
         })
         .catch(error => console.error(error));
         
-        if (dev) {
+        if (devConfiguration.devEnv) {
           console.log("Dev: Response from RDF store: ", jsonLD);
         }
 
@@ -386,7 +398,7 @@ console.log(
         console.log(coordinates);
   })
 
-  if (dev()) {
+  if (devConfiguration.devEnv) {
     pifm.on("popupopen", () => {
       devConsole("Dev: Message fired on POPUP OPENING");
     });
@@ -398,13 +410,8 @@ console.log(
 })();
 
 /**
- * dev environment tester
+ * dev environment functions
  */
-function dev() {
-  return (location.host === "localhost" || location.host === "127.0.0.1")
-    ? true
-    : false;
-}
 function devConsole(log) {
   console.log(
     `%c${log}: `,
