@@ -136,8 +136,9 @@ console.log(
        * Event passé automatiquement au callback
        * Le callback est exécuté lorsque la visioneuse s'ouvre
        */
+      layer.on("popupopen", async (event) => {
 
-        const popupId = `id-${e.popup._leaflet_id}-`;
+        const popupId = `id-${event.popup._leaflet_id}-`;
 
         let URI = feature.properties.URI;
 
@@ -384,14 +385,14 @@ console.log(
    */
 
   /** récupérer données de géolocalisation */
-  pifm.on("click", (e) => {
+  pifm.on("click", (event) => {
 
-    console.log(e.latlng);
+    console.log(event.latlng);
 
     let coordinates   = `[ a ecrm:E53_Place ;\n`;
         coordinates  += `  ecrm:P168_place_is_defined_by [\n`;
         coordinates  += `    a geo:Geometry ;\n`;
-        coordinates  += `    geo:asGeoJSON "{\\"type\\": \\"Point\\", \\"coordinates\\": [${e.latlng.lng},${e.latlng.lat}]}"^^geo:geoJSONLiteral\n`
+        coordinates  += `    geo:asGeoJSON "{\\"type\\": \\"Point\\", \\"coordinates\\": [${event.latlng.lng},${event.latlng.lat}]}"^^geo:geoJSONLiteral\n`
         coordinates  += `  ]\n`;
         coordinates  += `]`;
 
@@ -402,8 +403,8 @@ console.log(
     pifm.on("popupopen", () => {
       devConsole("Dev: Message fired on POPUP OPENING");
     });
-    pifm.on("popupclose", (e) => {
-      devConsole("Dev CLOSE: Message fired on pop-up closing", e);
+    pifm.on("popupclose", (event) => {
+      devConsole("Dev CLOSE: Message fired on pop-up closing", event);
     });
   };
 
