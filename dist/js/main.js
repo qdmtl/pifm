@@ -15,6 +15,11 @@
  * @todo get rid of warnings liens source (map)
  * @todo voir https://geojson.org/geojson-ld/
  */
+
+import {
+  sparql
+} from "./modules/strings.js";
+
 console.log(
   "%cBienvenue sur le PIFM",
   "font-family:monospace;font-size:14px;color:darkblue;"
@@ -22,22 +27,33 @@ console.log(
 
 (async function main() {
 
-  let response;
-
   /** URLs assignments */
   let tilesUrl = "https://qdmtl.ca/pifm/tiles/{z}/{x}/{y}.png",
     tripleStoreEndpointUrl = "https://qdmtl.ca/sparql/endpoint.php";
 
   /**
-   * Fetch values for dev env 
-   * Store dev env values in session storage
+   * Fetch values for dev environment
    * ./js/config.json is .gitignored
    */
-  if (dev()) {
+  const devConfiguration = await fetch("./dist/js/config.json")
+    .then(response => {
+      if (!response.ok) {
+        return {
+          devEnv: false
+        };
+      }
+      return response.json();
+    })
+    .catch(error => console.error(error));
 
-    response = await fetch("./dist/js/config.json");
-    const devConfiguration = await response.json();
+  if (devConfiguration.devEnv) {
 
+    console.log(
+      "%cDev Environment",
+      "font-family:monospace;font-size:14px;color:darkblue;"
+    );
+
+    // store dev env values in session storage
     for (const prop in devConfiguration) {
       sessionStorage.setItem(prop, devConfiguration[prop]);
     }
@@ -49,29 +65,25 @@ console.log(
     }
   }
 
-  /** SPARQL query for buildings */
-  const buildingsQuery = "query=" + encodeURIComponent(
-    "PREFIX ecrm:<http://erlangen-crm.org/current/>PREFIX geo:<http://www.opengis.net/ont/geosparql#>SELECT ?a ?b WHERE{?a a <http://onto.qdmtl.ca/E24_Building>;ecrm:P53_has_former_or_current_location ?c.?c ecrm:P168_place_is_defined_by ?d.?d geo:asGeoJSON ?b.}"
-    );
-
   /**
-   * fetching data from triple store
+   * fetching data from RDF store
    * buildings with geographic coordinates
    */
-  response = await fetch(tripleStoreEndpointUrl, {
+  const sparqlResponse = await fetch(tripleStoreEndpointUrl, {
     method: "POST",
     headers: {
       "Accept": "application/sparql-results+json",
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: buildingsQuery
-  });
-
-  if(!response.ok){
-    throw new Error(`An error occurred: ${response.status}`)
-  }
-
-  const sparqlResponse = await response.json();
+    body: sparql.buildings
+  })
+  .then(response => {
+    if(!response.ok) {
+      throw new Error(`An error occurred: ${response.status}`)
+    };
+    return response.json();
+  })
+  .catch(error => console.error(error));
 
   console.log(
     "%c%i bâtiments géolocalisés",
@@ -92,7 +104,7 @@ console.log(
           "URI": feature.a.value
         },
         "geometry": JSON.parse(feature.b.value)
-      }
+      };
     });
 
     return {
@@ -101,9 +113,15 @@ console.log(
     };
   };
 
-  /** GeoJSON Layer */
+  /**
+   * GeoJSON Layer for Leaflet
+   * L object is accessible via script tag in the HTML file
+   */
   const geoJSON = L.geoJSON(geojsonFeatures(sparqlResponse), {
-
+    
+    // cet objet permet de spécifier les options pour la méthode geoJSON()
+    // doc: https://leafletjs.com/reference.html#geojson-option
+    // la propriété onEachFeature permet de spécifier les opérations à effectuer pour chaque feature
     onEachFeature: (feature, layer) => {
 
       const popup = L.popup({
@@ -115,15 +133,17 @@ console.log(
 
       layer.bindPopup(popup);
 
-      /** Event passé automatiquement au callback */
-      layer.on("popupopen", async (e) => {
+      /**
+       * Event passé automatiquement au callback
+       * Le callback est exécuté lorsque la visioneuse s'ouvre
+       */
+      layer.on("popupopen", async (event) => {
 
-        const popupId = `id-${e.popup._leaflet_id}-`;
+        const popupId = `id-${event.popup._leaflet_id}-`;
 
-        let response;
         let URI = feature.properties.URI;
 
-        if (dev()) {
+        if (devConfiguration.devEnv) {
           if (sessionStorage.getItem("onLineTripleStore") !== "true") {
             URI = feature.properties.URI.replace("http://data.qdmtl.ca", sessionStorage.getItem("devTripleStoreUrl"));
             devConsole("Dev triple store");
@@ -133,123 +153,159 @@ console.log(
         }
 
         /**
-         * Fetching the ressource
+         * Fetching the resource
          */
-        response = await fetch(URI, {
+        const jsonLD = await fetch(URI, {
           method: "GET",
           headers: {
             "Accept": "application/ld+json",
           }
-        });
-
-        const jsonLD = await response.json();
+        })
+        .then((response) => {
+          if(!response.ok) {
+            throw new Error(`An error occurred: ${response.status}`)
+          };
+          return response.json();
+        })
+        .catch(error => console.error(error));
         
-        if (dev) {
+        if (devConfiguration.devEnv) {
           console.log("Dev: Response from RDF store: ", jsonLD);
         }
 
-        const popUpInformation = `
+        let popUpInformation, resourceUri;
 
-          <div id="${popupId}loader" class="loader">
-            <div class="spinner"></div>
-            <p>Chargement</p>
-            <p id="${popupId}counter"></p>
-          </div>
+        try {
 
-          <div id="${popupId}glide" class="custom-glide">
+          popUpInformation = `
 
-            <div class="glide__track" data-glide-el="track">
-              <ul class="glide__slides" id="${popupId}slides">
-              </ul>
+            <div id="${popupId}loader" class="loader">
+              <div class="spinner"></div>
+              <p>Chargement</p>
+              <p id="${popupId}counter"></p>
             </div>
 
-            <div class="glide__arrows" data-glide-el="controls">
-              <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                  <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
-                </svg>
-              </button>
-              <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                  <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        
-          <div class="rdf-data">
-            <h1>${feature.properties.URI}</h1>
-            <div>
-              <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
-            </div>
-          </div>
-        `;
+            <div id="${popupId}glide" class="custom-glide">
 
+              <div class="glide__track" data-glide-el="track">
+                <ul class="glide__slides" id="${popupId}slides">
+                </ul>
+              </div>
+
+              <div class="glide__arrows" data-glide-el="controls">
+                <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
+                  </svg>
+                </button>
+                <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          
+            <div class="rdf-data">
+              <h1>${feature.properties.URI}</h1>
+              <div>
+                <pre>${
+                  (() => {
+                    if (JSON.stringify(jsonLD, undefined, 2)) {
+                      return JSON.stringify(jsonLD, undefined, 2);
+                    } else {
+                      return `<span style="color: #CB5151;">
+                    Une erreur est survenue pour la ressource identifiée par :</span>\n
+                    ${feature.properties.URI}\n
+                    Pour aider à régler le problème, vous pouvez contacter l'éditeur du PIFM :\n
+                    david.valentine@umontreal.ca\n
+                    Veuillez s'il vous plait mentionner l'identifiant de la ressource.\n
+                    Identifiant de la ressource :\n
+                    ${feature.properties.URI}`;
+                    }  
+                  })()
+                }</pre>
+              </div>
+            </div>
+          `;
+
+          /** Récupérer l'URI de la ressource */
+          jsonLD["@graph"].forEach((resource)=> {
+
+            if (resource["@id"].search("http://data.qdmtl.ca/Building/") > -1) {
+              resourceUri = resource["@id"];
+            }
+          });
+
+        } catch (error) {
+          console.error(error);
+        }
+
+        // injecte HTML pour la visionneuse
         popup.setContent(popUpInformation);
 
         /**
          * Déplacement et centrage de la punaise
          */
-        let targetLatLng = L.latLng(// coordonnées sont inversées avec GeoJSON */
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0],
-        );
-        const targetZoom = 20,
-          popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
-          targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
-        targetLatLng = pifm.unproject(targetPoint, targetZoom);
-        pifm.setView(targetLatLng, targetZoom);
+        const centering = () => {
 
-        /** Récupérer l'URI de la ressource */
-        let ressourceUri;
-        jsonLD["@graph"].forEach((ressource)=> {
+          let targetLatLng = L.latLng(// coordonnées sont inversées avec GeoJSON */
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+          );
+          const targetZoom = 20,
+            popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
+            targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
+          targetLatLng = pifm.unproject(targetPoint, targetZoom);
+          pifm.setView(targetLatLng, targetZoom);
+        };
 
-          if (ressource["@id"].search("http://data.qdmtl.ca/Building/") > -1) {
-            ressourceUri = ressource["@id"];
-          }
-        })
+        centering();
 
         /** SPARQL query for images */
-        let imagesQuery = "PREFIX rico:<https://www.ica.org/standards/RiC/ontology#>PREFIX schema:<https://schema.org/>SELECT ?f WHERE{[]a rico:Record;rico:hasInstantiation ?i;rico:hasOrHadMainSubject<";
-        imagesQuery += ressourceUri;
-        imagesQuery += ">.?i schema:image ?f.}";
+        let imagesQuery = `PREFIX rico:<https://www.ica.org/standards/RiC/ontology#>PREFIX schema:<https://schema.org/>SELECT ?f WHERE{[]a rico:Record;rico:hasInstantiation ?i;rico:hasOrHadMainSubject<${resourceUri}>.?i schema:image ?f.}`;
         imagesQuery  = "query=" + encodeURIComponent(imagesQuery);
 
         /** fetch images URL */
-        response = await fetch(tripleStoreEndpointUrl, {
+        const sparqlResponse = await fetch(tripleStoreEndpointUrl, {
           method: "POST",
           headers: {
             "Accept": "application/sparql-results+json",
             "Content-Type": "application/x-www-form-urlencoded"
           },
           body: imagesQuery
-        });
-
-        const sparqlResponse = await response.json();
+        })
+        .then(response => {
+          if(!response.ok) {
+            throw new Error(`An error occurred: ${response.status}`)
+          };
+          return response.json();
+        })
+        .catch(error => console.error(error));
 
         /** URLs list */
         let imageUrls = sparqlResponse.results.bindings.map(url => {
           return url.f.value;
         });
 
-        /** loads an image, returns a promise */
-        const loadImage = src => {
-
+        /** loading all resource images */
+        /** @todo charger 10 premiers, puis append 10 à la fois */
+        const imagesElements = await Promise.all(imageUrls.map(async src => {
+          
+          /** loads an image, returns a promise */
           return new Promise((resolve, reject) => {
-
             const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
             img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(`Erreur de téléchargement : ${src}`);
             console.log("Image en cache : ", img.complete);
-          });
-        }
+          })
+          .catch(error => console.error(error));
+        }))
+        .then(imgages => imgages.filter(img => img !== undefined));
 
-        /** loading all ressource images, async */
-        const imagesElements = await Promise.all(imageUrls.map(loadImage));
-
-        /** printing information */
-        console.log("Nombre d'images téléchargées : ", imagesElements.length);
+        /** printing information in visionneuse */
+        console.log(`Nombre d'images téléchargées : ${imagesElements.length}/${imageUrls.length}`);
         const imagesList = imagesElements.map((element) => {
           return {
             src: element.currentSrc
@@ -273,10 +329,10 @@ console.log(
 
           /** the loop blocks the main thread so this does nothing */
           let counter = document.querySelector(`p#${popupId}counter`);
-          counter.innerText = `${++index}/${imagesElements.length}`;
+          counter.innerText = `${++index}/${imageUrls.length}`;
         });
 
-        /** caroussel */
+        /** initialisation du caroussel */
         const glide = new Glide(`#${popupId}glide`, {
           type: 'carousel',
           perView: 2,
@@ -285,8 +341,13 @@ console.log(
           animationDuration: 200,
           keyboard: true
         });
-
         glide.mount();
+
+        // aviser user si des images manquent
+        if (imageUrls.length !== imagesElements.length) {
+          const message = `Certaines images ne peuvent pas être téléchargées pour l'instant :\n${imagesElements.length}/${imageUrls.length} images téléchargées.\n\nPour compléter le téléchargement :\n\n1. cliquez sur OK\n2. fermez la visionneuse (panneau de gauche)\n3. cliquez de nouveau sur la punaise de cette ressource\n4. répétez cette manipulation jusqu'à ce que cet avertissement ne s'affiche plus`
+          alert(message);
+        }
 
         /** hide the spinner */
         let loader = document.querySelector(`#${popupId}loader`);
@@ -336,57 +397,52 @@ console.log(
    */
   pifm.createPane('fixed', document.querySelector("#map"));
 
-  const addControls = (() => {
+  /** Layers control data */
+  const overlays = {
+    "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
+    "<span class=\"controles\">Bâtiments</span>": geoJSON,
+  };
 
-    /** Layers control data */
-    const overlays = {
-      "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
-      "<span class=\"controles\">Bâtiments</span>": geoJSON,
-    };
+  L.control.layers(null, overlays).addTo(pifm),
+  L.control.zoom({position:"topright"}).addTo(pifm),
+  L.control.scale({
+    position:"bottomright",
+    maxWidth: 150
+  }).addTo(pifm);
 
-    L.control.layers(null, overlays).addTo(pifm),
-    L.control.zoom({position:"topright"}).addTo(pifm),
-    L.control.scale({
-      position:"bottomright",
-      maxWidth: 150
-    }).addTo(pifm);
-
-  })();
+  /**
+   * Utilitaires
+   */
 
   /** récupérer données de géolocalisation */
-  pifm.on("click", (e) => {
+  pifm.on("click", (event) => {
 
-    console.log(e.latlng);
+    console.log(event.latlng);
 
     let coordinates   = `[ a ecrm:E53_Place ;\n`;
         coordinates  += `  ecrm:P168_place_is_defined_by [\n`;
         coordinates  += `    a geo:Geometry ;\n`;
-        coordinates  += `    geo:asGeoJSON "{\\"type\\": \\"Point\\", \\"coordinates\\": [${e.latlng.lng},${e.latlng.lat}]}"^^geo:geoJSONLiteral\n`
+        coordinates  += `    geo:asGeoJSON "{\\"type\\": \\"Point\\", \\"coordinates\\": [${event.latlng.lng},${event.latlng.lat}]}"^^geo:geoJSONLiteral\n`
         coordinates  += `  ]\n`;
         coordinates  += `]`;
 
         console.log(coordinates);
   })
 
-  if (dev()) {
+  if (devConfiguration.devEnv) {
     pifm.on("popupopen", () => {
       devConsole("Dev: Message fired on POPUP OPENING");
     });
-    pifm.on("popupclose", (e) => {
-      devConsole("Dev CLOSE: Message fired on pop-up closing", e);
+    pifm.on("popupclose", (event) => {
+      devConsole("Dev CLOSE: Message fired on pop-up closing", event);
     });
   };
 
 })();
 
 /**
- * dev env tester
+ * dev environment functions
  */
-function dev() {
-  return (location.host === "localhost" || location.host === "127.0.0.1" || location.host === "faubourg-demo.test")
-    ? true
-    : false;
-}
 function devConsole(log) {
   console.log(
     `%c${log}: `,
