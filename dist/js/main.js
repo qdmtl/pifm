@@ -173,71 +173,97 @@ console.log(
           console.log("Dev: Response from RDF store: ", jsonLD);
         }
 
-        const popUpInformation = `
+        let popUpInformation, resourceUri;
 
-          <div id="${popupId}loader" class="loader">
-            <div class="spinner"></div>
-            <p>Chargement</p>
-            <p id="${popupId}counter"></p>
-          </div>
+        try {
 
-          <div id="${popupId}glide" class="custom-glide">
+          popUpInformation = `
 
-            <div class="glide__track" data-glide-el="track">
-              <ul class="glide__slides" id="${popupId}slides">
-              </ul>
+            <div id="${popupId}loader" class="loader">
+              <div class="spinner"></div>
+              <p>Chargement</p>
+              <p id="${popupId}counter"></p>
             </div>
 
-            <div class="glide__arrows" data-glide-el="controls">
-              <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                  <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
-                </svg>
-              </button>
-              <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                  <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        
-          <div class="rdf-data">
-            <h1>${feature.properties.URI}</h1>
-            <div>
-              <pre>${JSON.stringify(jsonLD, undefined, 2)}</pre>
-            </div>
-          </div>
-        `;
+            <div id="${popupId}glide" class="custom-glide">
 
+              <div class="glide__track" data-glide-el="track">
+                <ul class="glide__slides" id="${popupId}slides">
+                </ul>
+              </div>
+
+              <div class="glide__arrows" data-glide-el="controls">
+                <button class="slider__arrow slider__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/>
+                  </svg>
+                </button>
+                <button class="slider__arrow slider__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path fill="#fff" d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          
+            <div class="rdf-data">
+              <h1>${feature.properties.URI}</h1>
+              <div>
+                <pre>${
+                  (() => {
+                    if (JSON.stringify(jsonLD, undefined, 2)) {
+                      return JSON.stringify(jsonLD, undefined, 2);
+                    } else {
+                      return `<span style="color: #CB5151;">
+                    Une erreur est survenue pour la ressource identifiée par :</span>\n
+                    ${feature.properties.URI}\n
+                    Pour aider à régler le problème, vous pouvez contacter l'éditeur du PIFM :\n
+                    david.valentine@umontreal.ca\n
+                    Veuillez s'il vous plait mentionner l'identifiant de la ressource.\n
+                    Identifiant de la ressource :\n
+                    ${feature.properties.URI}`;
+                    }  
+                  })()
+                }</pre>
+              </div>
+            </div>
+          `;
+
+          /** Récupérer l'URI de la ressource */
+          jsonLD["@graph"].forEach((resource)=> {
+
+            if (resource["@id"].search("http://data.qdmtl.ca/Building/") > -1) {
+              resourceUri = resource["@id"];
+            }
+          });
+
+        } catch (error) {
+          console.error(error);
+        }
+
+        // injecte HTML pour la visionneuse
         popup.setContent(popUpInformation);
 
         /**
          * Déplacement et centrage de la punaise
          */
-        let targetLatLng = L.latLng(// coordonnées sont inversées avec GeoJSON */
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0],
-        );
-        const targetZoom = 20,
-          popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
-          targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
-        targetLatLng = pifm.unproject(targetPoint, targetZoom);
-        pifm.setView(targetLatLng, targetZoom);
+        const centering = () => {
 
-        /** Récupérer l'URI de la ressource */
-        let ressourceUri;
-        jsonLD["@graph"].forEach((ressource)=> {
+          let targetLatLng = L.latLng(// coordonnées sont inversées avec GeoJSON */
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+          );
+          const targetZoom = 20,
+            popUpWidth = document.querySelector(".leaflet-popup").clientWidth,
+            targetPoint = pifm.project(targetLatLng, targetZoom).subtract([popUpWidth / 2, 0]);
+          targetLatLng = pifm.unproject(targetPoint, targetZoom);
+          pifm.setView(targetLatLng, targetZoom);
+        };
 
-          if (ressource["@id"].search("http://data.qdmtl.ca/Building/") > -1) {
-            ressourceUri = ressource["@id"];
-          }
-        })
+        centering();
 
         /** SPARQL query for images */
-        let imagesQuery = "PREFIX rico:<https://www.ica.org/standards/RiC/ontology#>PREFIX schema:<https://schema.org/>SELECT ?f WHERE{[]a rico:Record;rico:hasInstantiation ?i;rico:hasOrHadMainSubject<";
-        imagesQuery += ressourceUri;
-        imagesQuery += ">.?i schema:image ?f.}";
+        let imagesQuery = `PREFIX rico:<https://www.ica.org/standards/RiC/ontology#>PREFIX schema:<https://schema.org/>SELECT ?f WHERE{[]a rico:Record;rico:hasInstantiation ?i;rico:hasOrHadMainSubject<${resourceUri}>.?i schema:image ?f.}`;
         imagesQuery  = "query=" + encodeURIComponent(imagesQuery);
 
         /** fetch images URL */
@@ -303,7 +329,7 @@ console.log(
 
           /** the loop blocks the main thread so this does nothing */
           let counter = document.querySelector(`p#${popupId}counter`);
-          counter.innerText = `${++index}/${imagesElements.length}`;
+          counter.innerText = `${++index}/${imageUrls.length}`;
         });
 
         /** initialisation du caroussel */
@@ -315,8 +341,13 @@ console.log(
           animationDuration: 200,
           keyboard: true
         });
-
         glide.mount();
+
+        // aviser user si des images manquent
+        if (imageUrls.length !== imagesElements.length) {
+          const message = `Certaines images ne peuvent pas être téléchargées pour l'instant :\n${imagesElements.length}/${imageUrls.length} images téléchargées.\n\nPour compléter le téléchargement :\n\n1. cliquez sur OK\n2. fermez la visionneuse (panneau de gauche)\n3. cliquez de nouveau sur la punaise de cette ressource\n4. répétez cette manipulation jusqu'à ce que cet avertissement ne s'affiche plus`
+          alert(message);
+        }
 
         /** hide the spinner */
         let loader = document.querySelector(`#${popupId}loader`);
@@ -366,20 +397,18 @@ console.log(
    */
   pifm.createPane('fixed', document.querySelector("#map"));
 
-  const addControls = (() => {
+  /** Layers control data */
+  const overlays = {
+    "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
+    "<span class=\"controles\">Bâtiments</span>": geoJSON,
+  };
 
-    /** Layers control data */
-    const overlays = {
-      "<span class=\"controles\">Plan d'expropriation</span>": faubourgLayer,
-      "<span class=\"controles\">Bâtiments</span>": geoJSON,
-    };
-
-    L.control.layers(null, overlays).addTo(pifm),
-    L.control.zoom({position:"topright"}).addTo(pifm),
-    L.control.scale({
-      position:"bottomright",
-      maxWidth: 150
-    }).addTo(pifm);
+  L.control.layers(null, overlays).addTo(pifm),
+  L.control.zoom({position:"topright"}).addTo(pifm),
+  L.control.scale({
+    position:"bottomright",
+    maxWidth: 150
+  }).addTo(pifm);
 
   /**
    * Utilitaires
