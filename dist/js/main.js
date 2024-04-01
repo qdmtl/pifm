@@ -16,6 +16,10 @@
  * @todo voir https://geojson.org/geojson-ld/
  */
 
+import {
+  sparql
+} from "./modules/strings.js";
+
 console.log(
   "%cBienvenue sur le PIFM",
   "font-family:monospace;font-size:14px;color:darkblue;"
@@ -61,11 +65,6 @@ console.log(
     }
   }
 
-  /** SPARQL query for buildings */
-  const buildingsQuery = "query=" + encodeURIComponent(
-    "PREFIX ecrm:<http://erlangen-crm.org/current/>PREFIX geo:<http://www.opengis.net/ont/geosparql#>SELECT ?a ?b WHERE{?a a <http://onto.qdmtl.ca/E24_Building>;ecrm:P53_has_former_or_current_location ?c.?c ecrm:P168_place_is_defined_by ?d.?d geo:asGeoJSON ?b.}"
-    );
-
   /**
    * fetching data from RDF store
    * buildings with geographic coordinates
@@ -76,13 +75,15 @@ console.log(
       "Accept": "application/sparql-results+json",
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: buildingsQuery
-  }).then((response) => {
+    body: sparql.buildings
+  })
+  .then(response => {
     if(!response.ok) {
       throw new Error(`An error occurred: ${response.status}`)
     };
     return response.json();
-  }).catch(error => console.error(error));
+  })
+  .catch(error => console.error(error));
 
   console.log(
     "%c%i bâtiments géolocalisés",
